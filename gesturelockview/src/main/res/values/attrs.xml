@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="GestureLockViewGroup">
+        <!--&lt;!&ndash;样式&ndash;&gt;-->
+        <!--<attr name="style" format="enum">-->
+            <!--&lt;!&ndash;环形样式(拍卖)&ndash;&gt;-->
+            <!--<enum name="ring" value="0" />-->
+            <!--&lt;!&ndash;填充样式&ndash;&gt;-->
+            <!--<enum name="fill" value="1" />-->
+            <!--&lt;!&ndash;环形和填充样式混搭&ndash;&gt;-->
+            <!--<enum name="fill_and_ring" value="2" />-->
+        <!--</attr>-->
+        <!--手指没有触摸的内圆颜色-->
+        <attr name="color_no_finger_inner_circle" format="color" />
+        <!--手指没有触摸的外圆颜色-->
+        <attr name="color_no_finger_outer_circle" format="color" />
+        <!--&lt;!&ndash;环形样式时，手指没有触摸的环颜色和宽度&ndash;&gt;-->
+        <!--<attr name="color_no_finger_stroke" format="color" />-->
+        <!--<attr name="no_finger_stroke_width" format="integer" />-->
+        <!--手指触摸时的颜色-->
+        <attr name="color_finger_on" format="color" />
+        <!--手指触摸时内圆的颜色-->
+        <attr name="color_finger_on_inner_circle" format="color" />
+        <!--手指触摸时外圆的颜色-->
+        <attr name="color_finger_on_outer_circle" format="color" />
+        <!--&lt;!&ndash;环形样式时，手指触摸的环颜色和宽度&ndash;&gt;-->
+        <!--<attr name="color_finger_on_stroke" format="color"/>-->
+        <!--<attr name="finger_on_stoke_width" format="integer"/>-->
+        <!--手指离开时的颜色-->
+        <attr name="color_finger_up" format="color" />
+        <!--手指离开时的内圆颜色-->
+        <attr name="color_finger_up_inner_circle" format="color"/>
+        <!--手指离开时的外圆颜色-->
+        <attr name="color_finger_up_outer_circle" format="color"/>
+        <!--&lt;!&ndash;环形样式时，手指离开时的环颜色和宽度&ndash;&gt;-->
+        <!--<attr name="color_finger_up_stroke" format="color"/>-->
+        <!--<attr name="finger_up_stroke_width" format="integer"/>-->
+        <!--圆点的个数-->
+        <attr name="count" format="integer" />
+        <!--尝试的次数-->
+        <attr name="tryTimes" format="integer" />
+    </declare-styleable>
+</resources>
