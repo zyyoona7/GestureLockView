@@ -1,6 +1,6 @@
 # GestureLockView
 ###手势解锁
-[借鉴的连接](http://blog.csdn.net/lmj623565791/article/details/36236113)
+[学习大神的连接](http://blog.csdn.net/lmj623565791/article/details/36236113)
 ####想要实现的效果：<br>
   * 可以设置初始模式：设置初始密码模式。
   * 可以选择显示的模式：如圆环型(参考拍卖)，全部填充，自定义图片。
