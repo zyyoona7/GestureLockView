@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -9,8 +10,17 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="com.yoona.sample.MainActivity">
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Hello World!" />
+    <com.yoona.gesturelockview.GestureLockViewGroup
+        android:id="@+id/id_gestureLockViewGroup"
+        android:layout_width="200dp"
+        android:layout_height="200dp"
+        android:background="#F2F2F7"
+        android:gravity="center_vertical"
+        app:color_finger_on="#FF1734BF"
+        app:color_finger_up="#FFFF0000"
+        app:color_no_finger_inner_circle="#ff085D58"
+        app:color_no_finger_outer_circle="#ff08F0E0"
+        app:count="3"
+        app:tryTimes="5" />
+
 </RelativeLayout>

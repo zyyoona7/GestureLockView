@@ -7,7 +7,7 @@ import android.graphics.Path;
 import android.view.View;
 
 /**
- * Created by User on 2015/12/9.
+ * Created by zyyoona7 on 2015/12/9.
  */
 public class GestureLockView extends View {
 
@@ -76,6 +76,9 @@ public class GestureLockView extends View {
         this.mColorNoFingerOuter = colorNoFingerOuter;
         this.mColorFingerOn = colorFingerOn;
         this.mColorFingerUp = colorFingerUp;
+
+        mPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        mArrowPath = new Path();
     }
 
     @Override
