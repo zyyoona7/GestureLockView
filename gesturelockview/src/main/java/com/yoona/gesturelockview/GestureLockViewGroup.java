@@ -7,8 +7,10 @@ import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.Point;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.accessibility.AccessibilityManager;
 import android.widget.RelativeLayout;
 
 import java.util.ArrayList;
@@ -59,10 +61,24 @@ public class GestureLockViewGroup extends RelativeLayout {
     private int mNoFingerOuterCircleColor = 0xFFE0DBDB;
 
     //手指触摸时的颜色
-    private int mFingerOnColor = 0xFF378FC9;
+    private int mFingerOnColorInner = 0xFF378FC9;
+    private int mFingerOnColorOuter = 0xFF378FC9;
 
     //手指离开的颜色
-    private int mFingerUpColor = 0xFFFF0000;
+    private int mFingerUpColorMatchInner = 0xFFFF0000;
+    private int mFingerUpColorMatchOuter = 0xFFFF0000;
+    private int mFingerUpColorUnMatchOuter = 0xFFFF0000;
+    private int mFingerUpColorUnMatchInner = 0xFFFF0000;
+
+    private static final int STYLE_FILL = 0;
+    private int mNoFingerInnerCircleStyle = STYLE_FILL;
+    private int mNoFingerOuterCircleStyle = STYLE_FILL;
+    private int mFingerOnOuterCircleStyle = STYLE_FILL;
+    private int mFingerOnInnerCircleStyle = STYLE_FILL;
+    private int mFingerUpMatchInnerCircleStyle = STYLE_FILL;
+    private int mFingerUpMatchOuterCircleStyle = STYLE_FILL;
+    private int mFingerUpUnMatchOuterCircleStyle = STYLE_FILL;
+    private int mFingerUpUnMatchInnerCircleStyle = STYLE_FILL;
 
     //宽度和高度
     private int mWidth;
@@ -91,9 +107,9 @@ public class GestureLockViewGroup extends RelativeLayout {
     private boolean isInitMode = false;
 
     //初始化模式时的两次密码存储
-    private int[] mFirstAnwser = {0, 1, 2};
+    private int[] mFirstAnswer = {0, 1, 2};
 
-    private int[] mSecondAnwser = {0, 1, 2};
+    private int[] mSecondAnswer = {0, 1, 2};
 
     private boolean isFirstSet = true;
 
@@ -170,8 +186,21 @@ public class GestureLockViewGroup extends RelativeLayout {
 
         mNoFingerInnerCircleColor = array.getColor(R.styleable.GestureLockViewGroup_color_no_finger_inner_circle, mNoFingerInnerCircleColor);
         mNoFingerOuterCircleColor = array.getColor(R.styleable.GestureLockViewGroup_color_no_finger_outer_circle, mNoFingerOuterCircleColor);
-        mFingerOnColor = array.getColor(R.styleable.GestureLockViewGroup_color_finger_on, mFingerOnColor);
-        mFingerUpColor = array.getColor(R.styleable.GestureLockViewGroup_color_finger_up, mFingerUpColor);
+        mFingerOnColorInner = array.getColor(R.styleable.GestureLockViewGroup_color_finger_on_inner_circle, mFingerOnColorOuter);
+        mFingerOnColorOuter = array.getColor(R.styleable.GestureLockViewGroup_color_finger_on_outer_circle, mFingerOnColorOuter);
+        mFingerUpColorMatchInner = array.getColor(R.styleable.GestureLockViewGroup_color_finger_up_match_inner_circle, mFingerUpColorMatchOuter);
+        mFingerUpColorMatchOuter = array.getColor(R.styleable.GestureLockViewGroup_color_finger_up_match_outer_circle, mFingerUpColorMatchOuter);
+        mFingerUpColorUnMatchOuter = array.getColor(R.styleable.GestureLockViewGroup_color_finger_up_un_match_outer_circle, mFingerUpColorUnMatchOuter);
+        mFingerUpColorUnMatchInner = array.getColor(R.styleable.GestureLockViewGroup_color_finger_up_un_match_inner_circle, mFingerUpColorUnMatchOuter);
+
+        mNoFingerInnerCircleStyle = array.getInt(R.styleable.GestureLockViewGroup_style_no_finger_inner_circle, mNoFingerOuterCircleStyle);
+        mNoFingerOuterCircleStyle = array.getInt(R.styleable.GestureLockViewGroup_style_no_finger_outer_circle, mNoFingerOuterCircleStyle);
+        mFingerOnOuterCircleStyle = array.getInt(R.styleable.GestureLockViewGroup_style_finger_on_outer_circle, mFingerOnOuterCircleStyle);
+        mFingerOnInnerCircleStyle = array.getInt(R.styleable.GestureLockViewGroup_style_finger_on_inner_circle, mFingerOnOuterCircleStyle);
+        mFingerUpMatchInnerCircleStyle = array.getInt(R.styleable.GestureLockViewGroup_style_finger_up_match_inner_circle, mFingerUpMatchOuterCircleStyle);
+        mFingerUpMatchOuterCircleStyle = array.getInt(R.styleable.GestureLockViewGroup_style_finger_up_match_outer_circle, mFingerUpMatchOuterCircleStyle);
+        mFingerUpUnMatchOuterCircleStyle = array.getInt(R.styleable.GestureLockViewGroup_style_finger_up_un_match_outer_circle, mFingerUpUnMatchOuterCircleStyle);
+        mFingerUpUnMatchInnerCircleStyle = array.getInt(R.styleable.GestureLockViewGroup_style_finger_up_un_match_inner_circle, mFingerUpUnMatchOuterCircleStyle);
         mCount = array.getInt(R.styleable.GestureLockViewGroup_count, 3);
         mTryTimes = array.getInt(R.styleable.GestureLockViewGroup_tryTimes, 5);
 
@@ -204,7 +233,9 @@ public class GestureLockViewGroup extends RelativeLayout {
             mPaint.setStrokeWidth(mGestureLockViewWidth * 0.29f);
 
             for (int i = 0; i < mGestureLockViews.length; i++) {
-                mGestureLockViews[i] = new GestureLockView(getContext(), mNoFingerInnerCircleColor, mNoFingerOuterCircleColor, mFingerOnColor, mFingerUpColor);
+                mGestureLockViews[i] = new GestureLockView(getContext(), mNoFingerInnerCircleColor, mNoFingerOuterCircleColor, mFingerOnColorInner, mFingerOnColorOuter,
+                        mFingerUpColorMatchInner, mFingerUpColorMatchOuter, mFingerUpColorUnMatchInner, mFingerUpColorUnMatchOuter, mNoFingerInnerCircleStyle, mNoFingerOuterCircleStyle,
+                        mFingerOnInnerCircleStyle, mFingerOnOuterCircleStyle, mFingerUpMatchInnerCircleStyle, mFingerUpMatchOuterCircleStyle, mFingerUpUnMatchInnerCircleStyle, mFingerUpUnMatchOuterCircleStyle);
                 mGestureLockViews[i].setId(i + 1);
                 //设置参数，主要是定位GestureLockView间的位置
                 RelativeLayout.LayoutParams lockerParams = new LayoutParams(mGestureLockViewWidth, mGestureLockViewWidth);
@@ -241,6 +272,29 @@ public class GestureLockViewGroup extends RelativeLayout {
     }
 
     @Override
+    public boolean onHoverEvent(MotionEvent event) {
+        if (((AccessibilityManager) getContext().getSystemService(Context.ACCESSIBILITY_SERVICE))
+                .isTouchExplorationEnabled()) {
+            final int action = event.getAction();
+            switch (action) {
+                case MotionEvent.ACTION_HOVER_ENTER:
+                    event.setAction(MotionEvent.ACTION_DOWN);
+                    break;
+                case MotionEvent.ACTION_HOVER_MOVE:
+                    event.setAction(MotionEvent.ACTION_MOVE);
+                    break;
+                case MotionEvent.ACTION_HOVER_EXIT:
+                    event.setAction(MotionEvent.ACTION_UP);
+                    break;
+            }
+            onTouchEvent(event);
+            event.setAction(action);
+        }
+        return super.onHoverEvent(event);
+    }
+
+
+    @Override
     public boolean onTouchEvent(MotionEvent event) {
         int action = event.getAction();
         int x = (int) event.getX();
@@ -248,17 +302,30 @@ public class GestureLockViewGroup extends RelativeLayout {
         GestureLockView touchChild = null;
         switch (action) {
             case MotionEvent.ACTION_DOWN:
+                Log.e("MotionEvent", "ACTION_DOWN");
                 reset();
-                mPaint.setColor(mFingerOnColor);
+                mPaint.setColor(mFingerOnColorOuter);
                 mPaint.setAlpha(50);
                 touchChild = getChildIdByPos(x, y);
                 if (touchChild != null) {
                     int touchId = touchChild.getId();
                     mChoose.add(touchId);
                     touchChild.setMode(GestureLockView.Mode.STATUS_FINGER_ON);
+                    // 设置指引线的起点
+                    mLastPathX = touchChild.getLeft() / 2 + touchChild.getRight() / 2;
+                    mLastPathY = touchChild.getTop() / 2 + touchChild.getBottom() / 2;
+
+                    if (mChoose.size() == 1)// 当前添加为第一个
+                    {
+                        mPath.moveTo(mLastPathX, mLastPathY);
+                    }
                 }
+                // 指引线的终点
+                mTmpTarget.x = x;
+                mTmpTarget.y = y;
                 break;
             case MotionEvent.ACTION_MOVE:
+                Log.e("MotionEvent", "ACTION_MOVE.......");
                 GestureLockView child = getChildIdByPos(x, y);
                 if (child != null) {
                     int cId = child.getId();
@@ -273,6 +340,8 @@ public class GestureLockViewGroup extends RelativeLayout {
                         //设置指引线的起点
                         mLastPathX = child.getLeft() / 2 + child.getRight() / 2;
                         mLastPathY = child.getTop() / 2 + child.getBottom() / 2;
+                        Log.e("LastPath", "LastPathX:" + mLastPathX);
+                        Log.e("LastPath", "LastPathY:" + mLastPathY);
                         if (mChoose.size() == 1) {// 当前添加为第一个
                             mPath.moveTo(mLastPathX, mLastPathY);
                         } else {
@@ -286,11 +355,15 @@ public class GestureLockViewGroup extends RelativeLayout {
                 mTmpTarget.y = y;
                 break;
             case MotionEvent.ACTION_UP:
-                mPaint.setColor(mFingerUpColor);
+                Log.e("MotionEvent", "ACTION_UP..");
+                mPaint.setColor(mFingerUpColorMatchOuter);
                 mPaint.setAlpha(50);
                 if (isInitMode) {
+
                     if (mOnGestureLockViewInitModeListener != null) {
                         handleInitModeCallback();
+                    } else {
+                        changeItemMode(false);
                     }
                 } else {
                     this.mTryTimes--;
@@ -299,6 +372,13 @@ public class GestureLockViewGroup extends RelativeLayout {
                         if (this.mTryTimes == 0) {
                             mOnGestureLockViewListener.onUnmatchedExceedBoundary();
                         }
+                        if (checkAnswer()) {
+                            changeItemMode(true);
+                        } else {
+                            changeItemMode(false);
+                        }
+                    } else {
+                        changeItemMode(false);
                     }
                 }
                 //将终点设置位置为起点，即取消指引线
@@ -306,7 +386,7 @@ public class GestureLockViewGroup extends RelativeLayout {
                 mTmpTarget.y = mLastPathY;
 
                 //改变选中的GestureLockView的状态
-                changeItemMode();
+//                changeItemMode();
 
                 // 计算每个元素中箭头需要旋转的角度
                 computeRange();
@@ -326,19 +406,24 @@ public class GestureLockViewGroup extends RelativeLayout {
             } else {
                 mOnGestureLockViewInitModeListener.onInitModeGestureEvent(false);
             }
+            changeItemMode(false);
         } else {
             if (isFirstSet) {
-                mFirstAnwser = getInitModeAnswer(mChoose);
-                mOnGestureLockViewInitModeListener.onFirstGestureSuccess(mFirstAnwser);
+                mFirstAnswer = getInitModeAnswer(mChoose);
+                mOnGestureLockViewInitModeListener.onFirstGestureSuccess(mFirstAnswer);
+                changeItemMode(true);
                 clearGestureLockView();
                 isFirstSet = false;
             } else {
-                mSecondAnwser = getInitModeAnswer(mChoose);
-                if (checkInitModeAnswer(mFirstAnwser, mSecondAnwser)) {
-                    mOnGestureLockViewInitModeListener.onSecondGestureSuccess(mSecondAnwser);
+                mSecondAnswer = getInitModeAnswer(mChoose);
+                if (checkInitModeAnswer(mFirstAnswer, mSecondAnswer)) {
+                    mOnGestureLockViewInitModeListener.onSecondGestureSuccess(mSecondAnswer);
+                    changeItemMode(true);
                     isFirstSet = true;
+                } else {
+                    changeItemMode(false);
                 }
-                mOnGestureLockViewInitModeListener.onInitModeGestureEvent(checkInitModeAnswer(mFirstAnwser, mSecondAnwser));
+                mOnGestureLockViewInitModeListener.onInitModeGestureEvent(checkInitModeAnswer(mFirstAnswer, mSecondAnswer));
             }
         }
     }
@@ -375,10 +460,11 @@ public class GestureLockViewGroup extends RelativeLayout {
         //设置了内边距，即x,y必须落入下GestureLockView的内部中间的小区域中，可以通过调整padding使得x,y落入范围不变大，或者不设置padding
         int padding = (int) (mGestureLockViewWidth * 0.15);
 
-        if (x >= child.getLeft() + padding && x <= child.getRight() - padding && y >= child.getTop() + padding && y <= child.getBottom() - padding) {
+        if (x >= child.getLeft() + padding && x <= child.getRight() - padding
+                && y >= child.getTop() + padding
+                && y <= child.getBottom() - padding) {
             return true;
         }
-
         return false;
     }
 
@@ -423,7 +509,23 @@ public class GestureLockViewGroup extends RelativeLayout {
     private void changeItemMode() {
         for (GestureLockView gestureLockView : mGestureLockViews) {
             if (mChoose.contains(gestureLockView.getId())) {
-                gestureLockView.setMode(GestureLockView.Mode.STATUS_FINGER_UP);
+                gestureLockView.setMode(GestureLockView.Mode.STATUS_FINGER_UP_MATCH);
+            }
+        }
+    }
+
+    private void changeItemMode(boolean isMatch) {
+        if (isMatch) {
+            for (GestureLockView gestureLockView : mGestureLockViews) {
+                if (mChoose.contains(gestureLockView.getId())) {
+                    gestureLockView.setMode(GestureLockView.Mode.STATUS_FINGER_UP_MATCH);
+                }
+            }
+        } else {
+            for (GestureLockView gestureLockView : mGestureLockViews) {
+                if (mChoose.contains(gestureLockView.getId())) {
+                    gestureLockView.setMode(GestureLockView.Mode.STATUS_FINGER_UP_UN_MATH);
+                }
             }
         }
     }
@@ -490,7 +592,6 @@ public class GestureLockViewGroup extends RelativeLayout {
         if (mPath != null) {
             canvas.drawPath(mPath, mPaint);
         }
-
         //绘制指引线
         if (mChoose.size() > 0) {
             if (mLastPathX != 0 && mLastPathY != 0)

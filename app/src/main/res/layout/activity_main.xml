@@ -16,11 +16,18 @@
         android:layout_height="200dp"
         android:background="#F2F2F7"
         android:gravity="center_vertical"
-        app:color_finger_on="#FF1734BF"
-        app:color_finger_up="#FFFF0000"
+        app:color_finger_on_outer_circle="#FF1734BF"
+        app:color_finger_up_match_outer_circle="#FF00FF00"
+        app:color_finger_up_match_inner_circle="#FF0000FF"
+        app:color_finger_up_un_match_outer_circle="#FFFF0000"
         app:color_no_finger_inner_circle="#ff085D58"
         app:color_no_finger_outer_circle="#ff08F0E0"
         app:count="3"
+        app:style_finger_on_outer_circle="style_fill"
+        app:style_finger_up_match_inner_circle="style_stroke"
+        app:style_finger_up_match_outer_circle="style_fill"
+        app:style_finger_up_un_match_outer_circle="style_stroke"
+        app:style_no_finger_outer_circle="style_stroke"
         app:tryTimes="5" />
 
 </RelativeLayout>

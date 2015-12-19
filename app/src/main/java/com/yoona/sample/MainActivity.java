@@ -3,7 +3,6 @@ package com.yoona.sample;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
-import android.widget.Toast;
 
 import com.yoona.gesturelockview.GestureLockViewGroup;
 
@@ -11,7 +10,7 @@ import java.util.Arrays;
 
 public class MainActivity extends AppCompatActivity {
     private GestureLockViewGroup mGestureLockViewGroup;
-    //runnable去清除gestureLockView
+    //    runnable去清除gestureLockView
     private final Runnable clearRunnable = new Runnable() {
         @Override
         public void run() {
@@ -34,16 +33,16 @@ public class MainActivity extends AppCompatActivity {
 
                     @Override
                     public void onUnmatchedExceedBoundary() {
-                        Toast.makeText(MainActivity.this, "错误5次...",
-                                Toast.LENGTH_SHORT).show();
+//                        Toast.makeText(MainActivity.this, "错误5次...",
+//                                Toast.LENGTH_SHORT).show();
                         mGestureLockViewGroup.setUnMatchExceedBoundary(5);
                     }
 
                     @Override
                     public void onGestureEvent(boolean matched) {
                         postClearRunnable();
-                        Toast.makeText(MainActivity.this, matched + "",
-                                Toast.LENGTH_SHORT).show();
+//                        Toast.makeText(MainActivity.this, matched + "",
+//                                Toast.LENGTH_SHORT).show();
                     }
 
                     @Override

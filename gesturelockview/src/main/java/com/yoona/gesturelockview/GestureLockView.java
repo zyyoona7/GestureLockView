@@ -2,6 +2,7 @@ package com.yoona.gesturelockview;
 
 import android.content.Context;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.view.View;
@@ -17,7 +18,7 @@ public class GestureLockView extends View {
      * GestureLockView的三种状态
      */
     enum Mode {
-        STATUS_NO_FINGER, STATUS_FINGER_ON, STATUS_FINGER_UP
+        STATUS_NO_FINGER, STATUS_FINGER_ON, STATUS_FINGER_UP_UN_MATH, STATUS_FINGER_UP_MATCH
     }
 
     //GestureLockView当前状态
@@ -54,6 +55,8 @@ public class GestureLockView extends View {
      */
     private float mInnerCircleRadiusRate = 0.3f;
 
+    private static final int STYLE_FILL = 0;
+    private static final int STYLE_STROKE = 1;
     /**
      * 自定义的属性，在GestureLockViewGroup中传入
      */
@@ -62,20 +65,50 @@ public class GestureLockView extends View {
     //手指没有触摸时，外圆的颜色
     private int mColorNoFingerOuter;
     //手指触摸时，颜色
-    private int mColorFingerOn;
     private int mColorFingerOnInner;
     private int mColorFingerOnOuter;
-    //手指离开时，颜色
-    private int mColorFingerUp;
-    private int mColorFingerUpInner;
-    private int mColorFIngerUpOuter;
+    //手指离开时，匹配成功颜色
+    private int mColorFingerUpMatchInner;
+    private int mColorFIngerUpMatchOuter;
+    //手指离开时，匹配不成功颜色
+    private int mColorFingerUpUnMatchInner;
+    private int mColorFingerUpUnMatchOuter;
 
-    public GestureLockView(Context context, int colorNoFingerInner, int colorNoFingerOuter, int colorFingerOn, int colorFingerUp) {
+    //手指没有触摸时，外圆的风格
+    private int mStyleNoFingerOuter;
+    //手指没有触摸时，内圆的风格
+    private int mStyleNoFingerInner;
+    //手指触摸时，外圆的风格
+    private int mStyleFingerOnOuter;
+    private int mStyleFingerOnInner;
+    //手指离开时，匹配时外圆的风格
+    private int mStyleFingerUpMatchOuter;
+    private int mStyleFingerUpMatchInner;
+    //手指离开时，不匹配时外圆的风格
+    private int mStyleFingerUpUnMatchOuter;
+    private int mStyleFingerUpUnMatchInner;
+
+    public GestureLockView(Context context, int colorNoFingerInner, int colorNoFingerOuter, int colorFingerOnInner, int colorFIngerOnOuter,
+                           int colorFingerUpMatchInner, int colorFingerUpMatchOuter, int colorFingerUpUnMatchInner, int colorFingerUpUnMatchOuter,
+                           int styleNoFingerInner, int styleNoFingerOuter, int styleFingerOnInner, int styleFingerOnOuter, int styleFingerUpMatchInner,
+                           int styleFingerUpMatchOuter, int StyleFingerUpUnMatchInner, int StyleFingerUpUnMatchOuter) {
         super(context);
         this.mColorNoFingerInner = colorNoFingerInner;
         this.mColorNoFingerOuter = colorNoFingerOuter;
-        this.mColorFingerOn = colorFingerOn;
-        this.mColorFingerUp = colorFingerUp;
+        this.mColorFingerOnInner = colorFingerOnInner;
+        this.mColorFingerOnOuter = colorFIngerOnOuter;
+        this.mColorFingerUpMatchInner = colorFingerUpMatchInner;
+        this.mColorFIngerUpMatchOuter = colorFingerUpMatchOuter;
+        this.mColorFingerUpUnMatchInner = colorFingerUpUnMatchInner;
+        this.mColorFingerUpUnMatchOuter = colorFingerUpUnMatchOuter;
+        this.mStyleNoFingerInner = styleNoFingerInner;
+        this.mStyleNoFingerOuter = styleNoFingerOuter;
+        this.mStyleFingerOnInner = styleFingerOnInner;
+        this.mStyleFingerOnOuter = styleFingerOnOuter;
+        this.mStyleFingerUpMatchInner = styleFingerUpMatchInner;
+        this.mStyleFingerUpMatchOuter = styleFingerUpMatchOuter;
+        this.mStyleFingerUpUnMatchInner = StyleFingerUpUnMatchInner;
+        this.mStyleFingerUpUnMatchOuter = StyleFingerUpUnMatchOuter;
 
         mPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         mArrowPath = new Path();
@@ -109,36 +142,90 @@ public class GestureLockView extends View {
         switch (mCurrentStatus) {
             case STATUS_FINGER_ON:
                 //绘制外圆
-                mPaint.setStyle(Paint.Style.STROKE);
-                mPaint.setColor(mColorFingerOn);
-                mPaint.setStrokeWidth(2);
+                if (mStyleFingerOnOuter == STYLE_STROKE) {
+                    mPaint.setStyle(Paint.Style.STROKE);
+                    mPaint.setStrokeWidth(2);
+                } else {
+                    mPaint.setStyle(Paint.Style.FILL);
+                }
+                mPaint.setColor(mColorFingerOnOuter);
                 canvas.drawCircle(mCurrentX, mCurrentY, mRadius, mPaint);
 
                 //绘制内圆
-                mPaint.setStyle(Paint.Style.FILL);
+                if (mStyleFingerOnInner == STYLE_FILL) {
+                    mPaint.setStyle(Paint.Style.FILL);
+                } else {
+                    mPaint.setStyle(Paint.Style.STROKE);
+                    mPaint.setStrokeWidth(2);
+                }
+                mPaint.setColor(mColorFingerOnInner);
                 canvas.drawCircle(mCurrentX, mCurrentY, mRadius * mInnerCircleRadiusRate, mPaint);
 
                 break;
-            case STATUS_FINGER_UP:
+            case STATUS_FINGER_UP_MATCH:
                 //绘制外圆
-                mPaint.setStyle(Paint.Style.STROKE);
-                mPaint.setColor(mColorFingerUp);
-                mPaint.setStrokeWidth(2);
+                if (mStyleFingerUpMatchOuter == STYLE_STROKE) {
+                    mPaint.setStyle(Paint.Style.STROKE);
+                    mPaint.setStrokeWidth(2);
+                } else {
+                    mPaint.setStyle(Paint.Style.FILL);
+                }
+                mPaint.setColor(mColorFIngerUpMatchOuter);
                 canvas.drawCircle(mCurrentX, mCurrentY, mRadius, mPaint);
 
                 //绘制内圆
-                mPaint.setStyle(Paint.Style.FILL);
+                if (mStyleFingerUpMatchInner == STYLE_FILL) {
+                    mPaint.setStyle(Paint.Style.FILL);
+                } else {
+                    mPaint.setStyle(Paint.Style.STROKE);
+                    mPaint.setStrokeWidth(2);
+                }
+                mPaint.setColor(mColorFingerUpMatchInner);
+                canvas.drawCircle(mCurrentX, mCurrentY, mRadius * mInnerCircleRadiusRate, mPaint);
+                //绘制箭头
+                drawArrow(canvas);
+                break;
+            case STATUS_FINGER_UP_UN_MATH:
+                //绘制外圆
+                if (mStyleFingerUpUnMatchOuter == STYLE_STROKE) {
+                    mPaint.setStyle(Paint.Style.STROKE);
+                    mPaint.setStrokeWidth(2);
+                } else {
+                    mPaint.setStyle(Paint.Style.FILL);
+                }
+                mPaint.setColor(mColorFingerUpUnMatchOuter);
+                canvas.drawCircle(mCurrentX, mCurrentY, mRadius, mPaint);
+
+                //绘制内圆
+                if (mStyleFingerUpUnMatchInner == STYLE_FILL) {
+                    mPaint.setStyle(Paint.Style.FILL);
+                } else {
+                    mPaint.setStyle(Paint.Style.STROKE);
+                    mPaint.setStrokeWidth(2);
+                }
+                mPaint.setColor(mColorFingerUpUnMatchInner);
                 canvas.drawCircle(mCurrentX, mCurrentY, mRadius * mInnerCircleRadiusRate, mPaint);
                 //绘制箭头
                 drawArrow(canvas);
                 break;
             case STATUS_NO_FINGER:
                 //绘制外圆
-                mPaint.setStyle(Paint.Style.FILL);
+                if (mStyleNoFingerOuter == STYLE_FILL) {
+                    mPaint.setStyle(Paint.Style.FILL);
+                } else {
+                    mPaint.setStyle(Paint.Style.STROKE);
+                    mPaint.setStrokeWidth(2);
+                }
                 mPaint.setColor(mColorNoFingerOuter);
                 canvas.drawCircle(mCurrentX, mCurrentY, mRadius, mPaint);
 
                 //绘制内圆
+                if (mStyleNoFingerInner == STYLE_FILL) {
+                    mPaint.setStyle(Paint.Style.FILL);
+                } else {
+                    mPaint.setStyle(Paint.Style.STROKE);
+                    mPaint.setStrokeWidth(2);
+                }
                 mPaint.setColor(mColorNoFingerInner);
                 canvas.drawCircle(mCurrentX, mCurrentY, mRadius * mInnerCircleRadiusRate, mPaint);
                 break;
