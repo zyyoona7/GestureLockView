@@ -41,7 +41,7 @@ public class GestureLockView extends View {
 
 
     /**
-     * 箭头（小三角最长边的一半长度 = mArrawRate * mWidth / 2 ）
+     * 箭头（小三角最长边的一半长度 = mArrowRate * mWidth / 2 ）
      */
     private float mArrowRate = 0.333f;
     //箭头旋转角度

@@ -17,7 +17,7 @@ import java.util.List;
 /**
  * 整体包含n*n个GestureLockView,每个GestureLockView间间隔mMarginBetweenLockView，
  * 最外层的GestureLockView与容器存在mMarginBetweenLockView的外边距
- * <p/>
+ * <p>
  * 关于GestureLockView的边长（n*n）： n * mGestureLockViewWidth + ( n + 1 ) *
  * mMarginBetweenLockView = mWidth ; 得：mGestureLockViewWidth = 4 * mWidth / ( 5
  * * mCount + 1 ) 注：mMarginBetweenLockView = mGestureLockViewWidth * 0.25 ;
@@ -84,8 +84,24 @@ public class GestureLockViewGroup extends RelativeLayout {
     //最大尝试次数
     private int mTryTimes = 5;
 
+    //初始模式时最小连接数
+    private int mLimitSelect = 3;
+
+    //是否为初始化模式
+    private boolean isInitMode = false;
+
+    //初始化模式时的两次密码存储
+    private int[] mFirstAnwser = {0, 1, 2};
+
+    private int[] mSecondAnwser = {0, 1, 2};
+
+    private boolean isFirstSet = true;
+
     //回调接口
     private OnGestureLockViewListener mOnGestureLockViewListener;
+
+    //初始模式回调接口
+    private OnGestureLockViewInitModeListener mOnGestureLockViewInitModeListener;
 
     public interface OnGestureLockViewListener {
 
@@ -107,6 +123,39 @@ public class GestureLockViewGroup extends RelativeLayout {
          * 超过最大尝试次数
          */
         void onUnmatchedExceedBoundary();
+    }
+
+    public interface OnGestureLockViewInitModeListener {
+
+        /**
+         * 未达到设置的最少连接数
+         *
+         * @param limitSelect 最少连接数
+         * @param select      当前连接数
+         */
+        void onLimitSelect(int limitSelect, int select);
+
+        /**
+         * 两次密码是否匹配
+         *
+         * @param matched
+         */
+        void onInitModeGestureEvent(boolean matched);
+
+        /**
+         * 第一次手势密码设置成功
+         *
+         * @param firstAnswer
+         */
+        void onFirstGestureSuccess(int[] firstAnswer);
+
+        /**
+         * 第二次手势密码设置成功，设置手势密码成功
+         *
+         * @param secondAnswer
+         */
+        void onSecondGestureSuccess(int[] secondAnswer);
+
     }
 
 
@@ -239,14 +288,19 @@ public class GestureLockViewGroup extends RelativeLayout {
             case MotionEvent.ACTION_UP:
                 mPaint.setColor(mFingerUpColor);
                 mPaint.setAlpha(50);
-                this.mTryTimes--;
-                if (mOnGestureLockViewListener != null && mChoose.size() > 0) {
-                    mOnGestureLockViewListener.onGestureEvent(checkAnswer());
-                    if (this.mTryTimes == 0) {
-                        mOnGestureLockViewListener.onUnmatchedExceedBoundary();
+                if (isInitMode) {
+                    if (mOnGestureLockViewInitModeListener != null) {
+                        handleInitModeCallback();
+                    }
+                } else {
+                    this.mTryTimes--;
+                    if (mOnGestureLockViewListener != null && mChoose.size() > 0) {
+                        mOnGestureLockViewListener.onGestureEvent(checkAnswer());
+                        if (this.mTryTimes == 0) {
+                            mOnGestureLockViewListener.onUnmatchedExceedBoundary();
+                        }
                     }
                 }
-
                 //将终点设置位置为起点，即取消指引线
                 mTmpTarget.x = mLastPathX;
                 mTmpTarget.y = mLastPathY;
@@ -255,23 +309,46 @@ public class GestureLockViewGroup extends RelativeLayout {
                 changeItemMode();
 
                 // 计算每个元素中箭头需要旋转的角度
-                for (int i = 0; i + 1 < mChoose.size(); i++) {
-                    int childId = mChoose.get(i);
-                    int nextChildId = mChoose.get(i + 1);
-
-                    GestureLockView startChild = (GestureLockView) findViewById(childId);
-                    GestureLockView nextChild = (GestureLockView) findViewById(nextChildId);
-
-                    int dx = nextChild.getLeft() - startChild.getLeft();
-                    int dy = nextChild.getTop() - startChild.getTop();
-                    // 计算角度
-                    int angle = (int) Math.toDegrees(Math.atan2(dy, dx)) + 90;
-                    startChild.setArrowDegree(angle);
-                }
+                computeRange();
                 break;
         }
         invalidate();
         return true;
+    }
+
+    /**
+     * 处理初始化模式回调方法
+     */
+    private void handleInitModeCallback() {
+        if (mChoose.size() < mLimitSelect) {
+            if (isFirstSet) {
+                mOnGestureLockViewInitModeListener.onLimitSelect(mLimitSelect, mChoose.size());
+            } else {
+                mOnGestureLockViewInitModeListener.onInitModeGestureEvent(false);
+            }
+        } else {
+            if (isFirstSet) {
+                mFirstAnwser = getInitModeAnswer(mChoose);
+                mOnGestureLockViewInitModeListener.onFirstGestureSuccess(mFirstAnwser);
+                clearGestureLockView();
+                isFirstSet = false;
+            } else {
+                mSecondAnwser = getInitModeAnswer(mChoose);
+                if (checkInitModeAnswer(mFirstAnwser, mSecondAnwser)) {
+                    mOnGestureLockViewInitModeListener.onSecondGestureSuccess(mSecondAnwser);
+                    isFirstSet = true;
+                }
+                mOnGestureLockViewInitModeListener.onInitModeGestureEvent(checkInitModeAnswer(mFirstAnwser, mSecondAnwser));
+            }
+        }
+    }
+
+    /**
+     * 重置GestureLockView
+     */
+    public void clearGestureLockView() {
+        reset();
+        invalidate();
     }
 
     /**
@@ -352,12 +429,40 @@ public class GestureLockViewGroup extends RelativeLayout {
     }
 
     /**
+     * 计算每个元素中箭头需要旋转的角度
+     */
+    private void computeRange() {
+        for (int i = 0; i + 1 < mChoose.size(); i++) {
+            int childId = mChoose.get(i);
+            int nextChildId = mChoose.get(i + 1);
+
+            GestureLockView startChild = (GestureLockView) findViewById(childId);
+            GestureLockView nextChild = (GestureLockView) findViewById(nextChildId);
+
+            int dx = nextChild.getLeft() - startChild.getLeft();
+            int dy = nextChild.getTop() - startChild.getTop();
+            // 计算角度
+            int angle = (int) Math.toDegrees(Math.atan2(dy, dx)) + 90;
+            startChild.setArrowDegree(angle);
+        }
+    }
+
+    /**
      * 设置回调接口
      *
      * @param listener
      */
     public void setOnGestureLockViewListener(OnGestureLockViewListener listener) {
         this.mOnGestureLockViewListener = listener;
+    }
+
+    /**
+     * 设置初始模式回调接口
+     *
+     * @param listener
+     */
+    public void setOnGestureLockViewInitModeListener(OnGestureLockViewInitModeListener listener) {
+        this.mOnGestureLockViewInitModeListener = listener;
     }
 
     /**
@@ -392,5 +497,59 @@ public class GestureLockViewGroup extends RelativeLayout {
                 canvas.drawLine(mLastPathX, mLastPathY, mTmpTarget.x,
                         mTmpTarget.y, mPaint);
         }
+    }
+
+    /**
+     * 是否进入初始化模式
+     *
+     * @param isInitMode
+     */
+    public void setInitMode(boolean isInitMode) {
+        this.isInitMode = isInitMode;
+    }
+
+    /**
+     * 获取初始模式的顺序
+     *
+     * @param choose
+     * @return
+     */
+    private int[] getInitModeAnswer(List<Integer> choose) {
+        int[] answer = new int[choose.size()];
+        for (int i = 0; i < choose.size(); i++) {
+            answer[i] = choose.get(i);
+        }
+
+        return answer;
+    }
+
+    /**
+     * 检查两组密码是否一致
+     *
+     * @param firstAnswer
+     * @param secondAnswer
+     * @return
+     */
+    private boolean checkInitModeAnswer(int[] firstAnswer, int[] secondAnswer) {
+        if (firstAnswer.length != secondAnswer.length) {
+            return false;
+        }
+
+        for (int i = 0; i < firstAnswer.length; i++) {
+            if (firstAnswer[i] != secondAnswer[i]) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * 设置最少连接数
+     *
+     * @param limitSelect
+     */
+    public void setLimitSelect(int limitSelect) {
+        this.mLimitSelect = limitSelect;
     }
 }
