@@ -174,18 +174,18 @@ public class GestureLockView extends View {
 
         //取长和宽中的小值
         mWidth = mWidth > mHeight ? mHeight : mWidth;
-        int strokeWidthM = Math.max(mStrokeWidthNoFingerOuter, mStrokeWidthFingerOnOuter);
-        int strokeWidthMa = Math.max(strokeWidthM, mStrokeWidthFingerUpMatchOuter);
-        int strokeWidthMax = Math.max(strokeWidthMa, mStrokeWidthFingerUpUnMatchOuter);
+        int strokeWidthM = Math.min(mStrokeWidthNoFingerOuter, mStrokeWidthFingerOnOuter);
+        int strokeWidthMi = Math.min(strokeWidthM, mStrokeWidthFingerUpMatchOuter);
+        int strokeWidthMin = Math.min(strokeWidthMi, mStrokeWidthFingerUpUnMatchOuter);
         //半径
         mRadius = mCurrentX = mCurrentY = mWidth / 2;
-        mRadius -= strokeWidthMax / 2;
+//        mRadius -= strokeWidthMin / 2;
 
         // 绘制三角形，初始时是个默认箭头朝上的一个等腰三角形，用户绘制结束后，根据由两个GestureLockView决定需要旋转多少度
         float mArrowLength = mWidth / 2 * mArrowRate;
-        mArrowPath.moveTo(mWidth / 2, strokeWidthMax + 2);
-        mArrowPath.lineTo(mWidth / 2 - mArrowLength, strokeWidthMax + 2 + mArrowLength);
-        mArrowPath.lineTo(mWidth / 2 + mArrowLength, strokeWidthMax + 2 + mArrowLength);
+        mArrowPath.moveTo(mWidth / 2, strokeWidthMin + 2);
+        mArrowPath.lineTo(mWidth / 2 - mArrowLength, strokeWidthMin + 2 + mArrowLength);
+        mArrowPath.lineTo(mWidth / 2 + mArrowLength, strokeWidthMin + 2 + mArrowLength);
         mArrowPath.close();
         mArrowPath.setFillType(Path.FillType.WINDING);
     }
@@ -200,20 +200,22 @@ public class GestureLockView extends View {
                     mPaint.setStyle(Paint.Style.STROKE);
                     mPaint.setStrokeWidth(mStrokeWidthFingerOnOuter);
                     mPaint.setColor(mColorFingerOnOuter);
-                    canvas.drawCircle(mCurrentX, mCurrentY, mRadius, mPaint);
+                    canvas.drawCircle(mCurrentX, mCurrentY, mRadius - mStrokeWidthFingerOnOuter / 2, mPaint);
                     mPaint.setStyle(Paint.Style.FILL);
                     mPaint.setColor(mColorFingerOnOuterInner);
-                    canvas.drawCircle(mCurrentX, mCurrentY, mRadius - mStrokeWidthFingerOnOuter / 2, mPaint);
+                    canvas.drawCircle(mCurrentX, mCurrentY, mRadius - mStrokeWidthFingerOnOuter, mPaint);
                 } else {
+                    mPaint.setColor(mColorFingerOnOuter);
                     if (mStyleFingerOnOuter == STYLE_STROKE) {
                         mPaint.setStyle(Paint.Style.STROKE);
                         mPaint.setStrokeWidth(mStrokeWidthFingerOnOuter);
+                        canvas.drawCircle(mCurrentX, mCurrentY, mRadius - mStrokeWidthFingerOnOuter / 2, mPaint);
                     } else {
                         mPaint.setStyle(Paint.Style.FILL);
+                        canvas.drawCircle(mCurrentX, mCurrentY, mRadius, mPaint);
                     }
 
-                    mPaint.setColor(mColorFingerOnOuter);
-                    canvas.drawCircle(mCurrentX, mCurrentY, mRadius, mPaint);
+
                 }
                 //绘制内圆
                 if (mStyleFingerOnInner == STYLE_FILL) {
@@ -232,19 +234,20 @@ public class GestureLockView extends View {
                     mPaint.setStyle(Paint.Style.STROKE);
                     mPaint.setStrokeWidth(mStrokeWidthFingerUpMatchOuter);
                     mPaint.setColor(mColorFingerUpMatchOuter);
-                    canvas.drawCircle(mCurrentX, mCurrentY, mRadius, mPaint);
+                    canvas.drawCircle(mCurrentX, mCurrentY, mRadius- mStrokeWidthFingerUpMatchOuter / 2, mPaint);
                     mPaint.setStyle(Paint.Style.FILL);
                     mPaint.setColor(mColorFingerUpMatchOuterInner);
-                    canvas.drawCircle(mCurrentX, mCurrentY, mRadius - mStrokeWidthFingerUpMatchOuter / 2, mPaint);
+                    canvas.drawCircle(mCurrentX, mCurrentY, mRadius - mStrokeWidthFingerUpMatchOuter , mPaint);
                 } else {
+                    mPaint.setColor(mColorFingerUpMatchOuter);
                     if (mStyleFingerUpMatchOuter == STYLE_STROKE) {
                         mPaint.setStyle(Paint.Style.STROKE);
                         mPaint.setStrokeWidth(mStrokeWidthFingerUpMatchOuter);
+                        canvas.drawCircle(mCurrentX, mCurrentY, mRadius - mStrokeWidthFingerUpMatchOuter / 2, mPaint);
                     } else {
                         mPaint.setStyle(Paint.Style.FILL);
+                        canvas.drawCircle(mCurrentX, mCurrentY, mRadius, mPaint);
                     }
-                    mPaint.setColor(mColorFingerUpMatchOuter);
-                    canvas.drawCircle(mCurrentX, mCurrentY, mRadius, mPaint);
                 }
                 //绘制内圆
                 if (mStyleFingerUpMatchInner == STYLE_FILL) {
@@ -267,19 +270,20 @@ public class GestureLockView extends View {
                     mPaint.setStyle(Paint.Style.STROKE);
                     mPaint.setStrokeWidth(mStrokeWidthFingerUpUnMatchOuter);
                     mPaint.setColor(mColorFingerUpUnMatchOuter);
-                    canvas.drawCircle(mCurrentX, mCurrentY, mRadius, mPaint);
+                    canvas.drawCircle(mCurrentX, mCurrentY, mRadius - mStrokeWidthFingerUpUnMatchOuter / 2, mPaint);
                     mPaint.setStyle(Paint.Style.FILL);
                     mPaint.setColor(mColorFingerUpUnMatchOuterInner);
-                    canvas.drawCircle(mCurrentX, mCurrentY, mRadius - mStrokeWidthFingerUpUnMatchOuter / 2, mPaint);
+                    canvas.drawCircle(mCurrentX, mCurrentY, mRadius - mStrokeWidthFingerUpUnMatchOuter, mPaint);
                 } else {
+                    mPaint.setColor(mColorFingerUpUnMatchOuter);
                     if (mStyleFingerUpUnMatchOuter == STYLE_STROKE) {
                         mPaint.setStyle(Paint.Style.STROKE);
                         mPaint.setStrokeWidth(mStrokeWidthFingerUpUnMatchOuter);
+                        canvas.drawCircle(mCurrentX, mCurrentY, mRadius - mStrokeWidthFingerUpUnMatchOuter / 2, mPaint);
                     } else {
                         mPaint.setStyle(Paint.Style.FILL);
+                        canvas.drawCircle(mCurrentX, mCurrentY, mRadius, mPaint);
                     }
-                    mPaint.setColor(mColorFingerUpUnMatchOuter);
-                    canvas.drawCircle(mCurrentX, mCurrentY, mRadius, mPaint);
                 }
                 //绘制内圆
                 if (mStyleFingerUpUnMatchInner == STYLE_FILL) {
@@ -301,19 +305,20 @@ public class GestureLockView extends View {
                     mPaint.setStyle(Paint.Style.STROKE);
                     mPaint.setStrokeWidth(mStrokeWidthNoFingerOuter);
                     mPaint.setColor(mColorNoFingerOuter);
-                    canvas.drawCircle(mCurrentX, mCurrentY, mRadius, mPaint);
+                    canvas.drawCircle(mCurrentX, mCurrentY, mRadius- mStrokeWidthNoFingerOuter / 2, mPaint);
                     mPaint.setStyle(Paint.Style.FILL);
                     mPaint.setColor(mColorNoFingerOuterInner);
-                    canvas.drawCircle(mCurrentX, mCurrentY, mRadius - mStrokeWidthNoFingerOuter / 2, mPaint);
+                    canvas.drawCircle(mCurrentX, mCurrentY, mRadius - mStrokeWidthNoFingerOuter, mPaint);
                 } else {
+                    mPaint.setColor(mColorNoFingerOuter);
                     if (mStyleNoFingerOuter == STYLE_FILL) {
                         mPaint.setStyle(Paint.Style.FILL);
+                        canvas.drawCircle(mCurrentX, mCurrentY, mRadius, mPaint);
                     } else {
                         mPaint.setStyle(Paint.Style.STROKE);
                         mPaint.setStrokeWidth(mStrokeWidthNoFingerOuter);
+                        canvas.drawCircle(mCurrentX, mCurrentY, mRadius - mStrokeWidthNoFingerOuter / 2, mPaint);
                     }
-                    mPaint.setColor(mColorNoFingerOuter);
-                    canvas.drawCircle(mCurrentX, mCurrentY, mRadius, mPaint);
                 }
                 //绘制内圆
                 if (mStyleNoFingerInner == STYLE_FILL) {

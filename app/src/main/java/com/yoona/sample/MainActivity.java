@@ -1,88 +1,92 @@
 package com.yoona.sample;
 
-import android.support.v7.app.AppCompatActivity;
+import android.app.Activity;
+import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.View;
+import android.widget.Button;
+import android.widget.TextView;
+import android.widget.Toast;
 
+import com.yoona.gesturelockview.GestureLockDisplayViews;
 import com.yoona.gesturelockview.GestureLockViewGroup;
 
 import java.util.Arrays;
 
 public class MainActivity extends AppCompatActivity {
     private GestureLockViewGroup mGestureLockViewGroup;
-    //    runnable去清除gestureLockView
-    private final Runnable clearRunnable = new Runnable() {
-        @Override
-        public void run() {
-            mGestureLockViewGroup.clearGestureLockView();
-        }
-    };
-
-    private static final int CLEAR_MILLS = 2000;
+    private GestureLockDisplayViews mGestureLockDisplayViews;
+    private TextView mTextView;
+    private TextView mTextView1;
+    private Button mButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         mGestureLockViewGroup = (GestureLockViewGroup) findViewById(R.id.id_gestureLockViewGroup);
-        mGestureLockViewGroup.setAnswer(new int[]{1, 2, 3, 4, 5});
+        mGestureLockDisplayViews = (GestureLockDisplayViews) findViewById(R.id.id_gestureLockDisplayViews);
+        mTextView = (TextView) findViewById(R.id.id_textView);
+        mTextView1 = (TextView) findViewById(R.id.id_textView1);
+        mButton = (Button) findViewById(R.id.id_button);
         mGestureLockViewGroup.setInitMode(true);
         mGestureLockViewGroup.setLimitSelect(5);
-        mGestureLockViewGroup
-                .setOnGestureLockViewListener(new GestureLockViewGroup.OnGestureLockViewListener() {
-
-                    @Override
-                    public void onUnmatchedExceedBoundary() {
-//                        Toast.makeText(MainActivity.this, "错误5次...",
-//                                Toast.LENGTH_SHORT).show();
-                        mGestureLockViewGroup.setUnMatchExceedBoundary(5);
-                    }
-
-                    @Override
-                    public void onGestureEvent(boolean matched) {
-                        postClearRunnable();
-//                        Toast.makeText(MainActivity.this, matched + "",
-//                                Toast.LENGTH_SHORT).show();
-                    }
-
-                    @Override
-                    public void onBlockSelected(int cId) {
-                        removeClearRunnable();
-                    }
-                });
 
         mGestureLockViewGroup.setOnGestureLockViewInitModeListener(new GestureLockViewGroup.OnGestureLockViewInitModeListener() {
             @Override
             public void onLimitSelect(int limitSelect, int select) {
-                Log.e("limit select", "limit select :" + limitSelect + " current select :" + select);
+                Toast.makeText(MainActivity.this, "最少连接" + limitSelect + "个", Toast.LENGTH_SHORT).show();
             }
 
             @Override
             public void onInitModeGestureEvent(boolean matched) {
                 Log.e("init mode gesture event", "matched :" + matched);
+                if (!matched) {
+                    startErrorAnim(true);
+                }
             }
 
             @Override
             public void onFirstGestureSuccess(int[] firstAnswer) {
-                Log.e("first gesture success", "first answer :" + Arrays.toString(firstAnswer));
+                mGestureLockDisplayViews.setSelected(firstAnswer);
+                mTextView.setText("请再次绘制");
             }
 
             @Override
             public void onSecondGestureSuccess(int[] secondAnswer) {
-                Log.e("second gesture success", "second answer :" + Arrays.toString(secondAnswer));
                 mGestureLockViewGroup.setInitMode(false);
+                SharedPreferences sp = getSharedPreferences("GestureLockView", Activity.MODE_PRIVATE);
+                SharedPreferences.Editor editor = sp.edit();
+                editor.putString("GestureLockView", Arrays.toString(secondAnswer));
+                editor.commit();
+                finish();
+            }
+        });
+
+        mButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mGestureLockViewGroup.reDraw();
+                mGestureLockDisplayViews.clearSelect();
+                startErrorAnim(false);
             }
         });
     }
 
 
-    public void postClearRunnable() {
-        mGestureLockViewGroup.removeCallbacks(clearRunnable);
-        mGestureLockViewGroup.postDelayed(clearRunnable, CLEAR_MILLS);
+    private void startErrorAnim(boolean isVisible) {
+        if (isVisible) {
+            mTextView1.setVisibility(View.VISIBLE);
+            mTextView1.setText("两次绘制的图形不一致");
+            mTextView1.setTextColor(Color.parseColor("#FF0000"));
+            CommonUtils.startShakeAnim(MainActivity.this, mTextView1);
+            mButton.setVisibility(View.VISIBLE);
+        } else {
+            mTextView1.setVisibility(View.GONE);
+            mButton.setVisibility(View.GONE);
+        }
     }
-
-    public void removeClearRunnable() {
-        mGestureLockViewGroup.removeCallbacks(clearRunnable);
-    }
-
 }

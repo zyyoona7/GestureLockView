@@ -4,30 +4,99 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="#E5E5E5"
     android:paddingBottom="@dimen/activity_vertical_margin"
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="com.yoona.sample.MainActivity">
 
-    <com.yoona.gesturelockview.GestureLockViewGroup
-        android:id="@+id/id_gestureLockViewGroup"
-        android:layout_width="200dp"
-        android:layout_height="200dp"
-        android:background="#F2F2F7"
-        android:gravity="center_vertical"
-        app:color_finger_on_outer_circle="#FF1734BF"
-        app:color_finger_up_match_outer_circle="#FF00FF00"
-        app:color_finger_up_match_inner_circle="#FF0000FF"
-        app:color_finger_up_un_match_outer_circle="#FFFF0000"
-        app:color_no_finger_inner_circle="#ff085D58"
-        app:color_no_finger_outer_circle="#ff08F0E0"
-        app:count="3"
-        app:style_finger_on_outer_circle="style_fill"
-        app:style_finger_up_match_inner_circle="style_stroke"
-        app:style_finger_up_match_outer_circle="style_fill"
-        app:style_finger_up_un_match_outer_circle="style_stroke"
-        app:style_no_finger_outer_circle="style_stroke"
-        app:tryTimes="5" />
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:orientation="vertical">
+
+        <com.yoona.gesturelockview.GestureLockDisplayViews
+            android:id="@+id/id_gestureLockDisplayViews"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_gravity="center_horizontal"
+            app:color_no_select="#838383"
+            app:color_selected="#01A0E5"
+            app:display_view_count="3"
+            app:stroke_width_no_select="2dp"
+            app:style_no_select="style_stroke"
+            app:style_selected="style_fill">
+
+        </com.yoona.gesturelockview.GestureLockDisplayViews>
+
+        <TextView
+            android:id="@+id/id_textView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_margin="10dp"
+            android:text="绘制手势密码"
+            android:textSize="16sp" />
+
+        <TextView
+            android:id="@+id/id_textView1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginBottom="10dp"
+            android:text="两次绘制的手势不一致"
+            android:textSize="16sp"
+            android:visibility="gone" />
+
+        <com.yoona.gesturelockview.GestureLockViewGroup
+            android:id="@+id/id_gestureLockViewGroup"
+            android:layout_width="300dp"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:background="#E5E5E5"
+            app:color_finger_on_inner_circle="#01A0E5"
+            app:color_finger_on_outer_circle="#01A0E5"
+            app:color_finger_on_outer_inner_circle="#ADD5E6"
+            app:color_finger_up_match_inner_circle="#01A0E5"
+            app:color_finger_up_match_outer_circle="#838383"
+            app:color_finger_up_match_outer_inner_circle="#99CFE6"
+            app:color_finger_up_un_match_inner_circle="#F7564A"
+            app:color_finger_up_un_match_outer_circle="#F7564A"
+            app:color_finger_up_un_match_outer_inner_circle="#EDACA7"
+            app:color_no_finger_inner_circle="#00FFFFFF"
+            app:color_no_finger_outer_circle="#838383"
+            app:count="3"
+            app:finger_on_path_color="#01A0E5"
+            app:finger_up_match_path_color="#01A0E5"
+            app:finger_up_un_match_path_color="#F7564A"
+            app:isShowArrow="false"
+            app:path_alpha="255"
+            app:path_width="3dp"
+            app:rate_arrow="0.5"
+            app:rate_finger_on_inner_circle="0.4"
+            app:rate_finger_up_match_inner_circle="0.4"
+            app:rate_finger_up_un_match_inner_circle="0.4"
+            app:stroke_width_finger_on_outer_circle="5"
+            app:stroke_width_finger_up_match_outer_circle="5"
+            app:stroke_width_finger_up_un_match_outer_circle="5"
+            app:stroke_width_no_finger_outer_circle="5"
+            app:style_finger_on_outer_circle="style_stroke_and_fill"
+            app:style_finger_up_match_inner_circle="style_fill"
+            app:style_finger_up_match_outer_circle="style_stroke_and_fill"
+            app:style_finger_up_un_match_outer_circle="style_stroke_and_fill"
+            app:style_no_finger_outer_circle="style_stroke"
+            app:tryTimes="5" />
+
+        <Button
+            android:id="@+id/id_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="20dp"
+            android:text="重绘"
+            android:visibility="gone" />
+    </LinearLayout>
 
 </RelativeLayout>

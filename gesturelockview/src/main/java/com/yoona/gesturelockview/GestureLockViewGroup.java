@@ -152,6 +152,8 @@ public class GestureLockViewGroup extends RelativeLayout {
 
     private boolean isFirstSet = true;
 
+    private boolean touchable = true;
+
     //回调接口
     private OnGestureLockViewListener mOnGestureLockViewListener;
 
@@ -171,8 +173,9 @@ public class GestureLockViewGroup extends RelativeLayout {
          * 是否匹配
          *
          * @param matched
+         * @param tryTimes 剩余次数
          */
-        void onGestureEvent(boolean matched);
+        void onGestureEvent(boolean matched, int tryTimes);
 
         /**
          * 超过最大尝试次数
@@ -345,22 +348,24 @@ public class GestureLockViewGroup extends RelativeLayout {
 
     @Override
     public boolean onHoverEvent(MotionEvent event) {
-        if (((AccessibilityManager) getContext().getSystemService(Context.ACCESSIBILITY_SERVICE))
-                .isTouchExplorationEnabled()) {
-            final int action = event.getAction();
-            switch (action) {
-                case MotionEvent.ACTION_HOVER_ENTER:
-                    event.setAction(MotionEvent.ACTION_DOWN);
-                    break;
-                case MotionEvent.ACTION_HOVER_MOVE:
-                    event.setAction(MotionEvent.ACTION_MOVE);
-                    break;
-                case MotionEvent.ACTION_HOVER_EXIT:
-                    event.setAction(MotionEvent.ACTION_UP);
-                    break;
+        if (touchable) {
+            if (((AccessibilityManager) getContext().getSystemService(Context.ACCESSIBILITY_SERVICE))
+                    .isTouchExplorationEnabled()) {
+                final int action = event.getAction();
+                switch (action) {
+                    case MotionEvent.ACTION_HOVER_ENTER:
+                        event.setAction(MotionEvent.ACTION_DOWN);
+                        break;
+                    case MotionEvent.ACTION_HOVER_MOVE:
+                        event.setAction(MotionEvent.ACTION_MOVE);
+                        break;
+                    case MotionEvent.ACTION_HOVER_EXIT:
+                        event.setAction(MotionEvent.ACTION_UP);
+                        break;
+                }
+                onTouchEvent(event);
+                event.setAction(action);
             }
-            onTouchEvent(event);
-            event.setAction(action);
         }
         return super.onHoverEvent(event);
     }
@@ -368,102 +373,106 @@ public class GestureLockViewGroup extends RelativeLayout {
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-        int action = event.getAction();
-        int x = (int) event.getX();
-        int y = (int) event.getY();
-        GestureLockView touchChild = null;
-        switch (action) {
-            case MotionEvent.ACTION_DOWN:
-                reset();
-                mPaint.setColor(mFingerOnPathColor);
-                mPaint.setAlpha(mPathAlpha);
-                touchChild = getChildIdByPos(x, y);
-                if (touchChild != null) {
-                    int touchId = touchChild.getId();
-                    mChoose.add(touchId);
-                    touchChild.setMode(GestureLockView.Mode.STATUS_FINGER_ON);
-                    // 设置指引线的起点
-                    mLastPathX = touchChild.getLeft() / 2 + touchChild.getRight() / 2;
-                    mLastPathY = touchChild.getTop() / 2 + touchChild.getBottom() / 2;
+        if (touchable) {
+            int action = event.getAction();
+            int x = (int) event.getX();
+            int y = (int) event.getY();
+            GestureLockView touchChild = null;
+            switch (action) {
+                case MotionEvent.ACTION_DOWN:
+                    reset();
+                    mPaint.setColor(mFingerOnPathColor);
+                    mPaint.setAlpha(mPathAlpha);
+                    touchChild = getChildIdByPos(x, y);
+                    if (touchChild != null) {
+                        int touchId = touchChild.getId();
+                        mChoose.add(touchId);
+                        touchChild.setMode(GestureLockView.Mode.STATUS_FINGER_ON);
+                        // 设置指引线的起点
+                        mLastPathX = touchChild.getLeft() / 2 + touchChild.getRight() / 2;
+                        mLastPathY = touchChild.getTop() / 2 + touchChild.getBottom() / 2;
 
-                    if (mChoose.size() == 1)// 当前添加为第一个
-                    {
-                        mPath.moveTo(mLastPathX, mLastPathY);
-                    }
-                }
-                // 指引线的终点
-                mTmpTarget.x = x;
-                mTmpTarget.y = y;
-                break;
-            case MotionEvent.ACTION_MOVE:
-                GestureLockView child = getChildIdByPos(x, y);
-                if (child != null) {
-                    int cId = child.getId();
-                    if (!mChoose.contains(cId) || mChoose.size() == 1) {
-                        if (!mChoose.contains(cId)) {
-                            mChoose.add(cId);
-                            child.setMode(GestureLockView.Mode.STATUS_FINGER_ON);
-                        }
-                        if (mOnGestureLockViewListener != null) {
-                            mOnGestureLockViewListener.onBlockSelected(cId);
-                        }
-                        //设置指引线的起点
-                        mLastPathX = child.getLeft() / 2 + child.getRight() / 2;
-                        mLastPathY = child.getTop() / 2 + child.getBottom() / 2;
-                        if (mChoose.size() == 1) {// 当前添加为第一个
+                        if (mChoose.size() == 1)// 当前添加为第一个
+                        {
                             mPath.moveTo(mLastPathX, mLastPathY);
-                        } else {
-                            //非一个，将两点连接
-                            mPath.lineTo(mLastPathX, mLastPathY);
                         }
                     }
-                }
-                //指引线的终点
-                mTmpTarget.x = x;
-                mTmpTarget.y = y;
-                break;
-            case MotionEvent.ACTION_UP:
-                mPaint.setColor(mFingerUpUnMatchPathColor);
-                mPaint.setAlpha(mPathAlpha);
-                if (isInitMode) {
+                    // 指引线的终点
+                    mTmpTarget.x = x;
+                    mTmpTarget.y = y;
+                    break;
+                case MotionEvent.ACTION_MOVE:
+                    GestureLockView child = getChildIdByPos(x, y);
+                    if (child != null) {
+                        int cId = child.getId();
+                        if (!mChoose.contains(cId) || mChoose.size() == 1) {
+                            if (!mChoose.contains(cId)) {
+                                mChoose.add(cId);
+                                child.setMode(GestureLockView.Mode.STATUS_FINGER_ON);
+                            }
+                            if (mOnGestureLockViewListener != null) {
+                                mOnGestureLockViewListener.onBlockSelected(cId);
+                            }
+                            //设置指引线的起点
+                            mLastPathX = child.getLeft() / 2 + child.getRight() / 2;
+                            mLastPathY = child.getTop() / 2 + child.getBottom() / 2;
+                            if (mChoose.size() == 1) {// 当前添加为第一个
+                                mPath.moveTo(mLastPathX, mLastPathY);
+                            } else {
+                                //非一个，将两点连接
+                                mPath.lineTo(mLastPathX, mLastPathY);
+                            }
+                        }
+                    }
+                    //指引线的终点
+                    mTmpTarget.x = x;
+                    mTmpTarget.y = y;
+                    break;
+                case MotionEvent.ACTION_UP:
+                    mPaint.setColor(mFingerUpUnMatchPathColor);
+                    mPaint.setAlpha(mPathAlpha);
+                    if (isInitMode) {
 
-                    if (mOnGestureLockViewInitModeListener != null) {
-                        handleInitModeCallback();
-                    } else {
-                        changeItemMode(false);
-                    }
-                } else {
-                    this.mTryTimes--;
-                    if (mOnGestureLockViewListener != null && mChoose.size() > 0) {
-                        mOnGestureLockViewListener.onGestureEvent(checkAnswer());
-                        if (this.mTryTimes == 0) {
-                            mOnGestureLockViewListener.onUnmatchedExceedBoundary();
-                        }
-                        if (checkAnswer()) {
-                            mPaint.setColor(mFingerUpMatchPathColor);
-                            mPaint.setAlpha(mPathAlpha);
-                            changeItemMode(true);
+                        if (mOnGestureLockViewInitModeListener != null) {
+                            handleInitModeCallback();
                         } else {
                             changeItemMode(false);
                         }
                     } else {
-                        changeItemMode(false);
+                        this.mTryTimes--;
+                        if (mOnGestureLockViewListener != null && mChoose.size() > 0) {
+                            mOnGestureLockViewListener.onGestureEvent(checkAnswer(), mTryTimes);
+                            if (this.mTryTimes == 0) {
+                                mOnGestureLockViewListener.onUnmatchedExceedBoundary();
+                            }
+                            if (checkAnswer()) {
+                                mPaint.setColor(mFingerUpMatchPathColor);
+                                mPaint.setAlpha(mPathAlpha);
+                                changeItemMode(true);
+                            } else {
+                                changeItemMode(false);
+                            }
+                        } else {
+                            changeItemMode(false);
+                        }
                     }
-                }
-                //将终点设置位置为起点，即取消指引线
-                mTmpTarget.x = mLastPathX;
-                mTmpTarget.y = mLastPathY;
+                    //将终点设置位置为起点，即取消指引线
+                    mTmpTarget.x = mLastPathX;
+                    mTmpTarget.y = mLastPathY;
 
-                //改变选中的GestureLockView的状态
+                    //改变选中的GestureLockView的状态
 //                changeItemMode();
-                if (isShowArrow) {
-                    // 计算每个元素中箭头需要旋转的角度
-                    computeRange();
-                }
-                break;
+                    if (isShowArrow) {
+                        // 计算每个元素中箭头需要旋转的角度
+                        computeRange();
+                    }
+                    break;
+            }
+            invalidate();
+            return true;
+        } else {
+            return false;
         }
-        invalidate();
-        return true;
     }
 
     /**
@@ -727,5 +736,22 @@ public class GestureLockViewGroup extends RelativeLayout {
      */
     public void setLimitSelect(int limitSelect) {
         this.mLimitSelect = limitSelect;
+    }
+
+    /**
+     * 初始化模式时候，重新绘制
+     */
+    public void reDraw() {
+        clearGestureLockView();
+        this.isFirstSet = true;
+    }
+
+    /**
+     * 是否处理touch事件
+     *
+     * @param touchable
+     */
+    public void setTouchable(boolean touchable) {
+        this.touchable = touchable;
     }
 }

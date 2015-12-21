@@ -109,4 +109,20 @@
         <!--尝试的次数-->
         <attr name="tryTimes" format="integer" />
     </declare-styleable>
+
+    <declare-styleable name="GestureLockDisplayViews">
+        <attr name="color_no_select" format="color" />
+        <attr name="color_selected" format="color" />
+        <attr name="style_no_select" format="enum">
+            <enum name="style_fill" value="0" />
+            <enum name="style_stroke" value="1" />
+        </attr>
+        <attr name="style_selected" format="enum">
+            <enum name="style_fill" value="0" />
+            <enum name="style_stroke" value="1" />
+        </attr>
+        <attr name="stroke_width_no_select" format="dimension" />
+        <attr name="stroke_width_selected" format="dimension" />
+        <attr name="display_view_count" format="integer" />
+    </declare-styleable>
 </resources>
