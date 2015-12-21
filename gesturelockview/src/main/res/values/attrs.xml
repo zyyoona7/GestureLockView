@@ -10,14 +10,11 @@
         <attr name="style_no_finger_outer_circle" format="enum">
             <enum name="style_fill" value="0" />
             <enum name="style_stroke" value="1" />
-            <enum name="style_stroke_and_fill" value="2" />
         </attr>
         <!--手指没有触摸的内圆颜色-->
         <attr name="color_no_finger_inner_circle" format="color" />
         <!--手指没有触摸的外圆颜色-->
         <attr name="color_no_finger_outer_circle" format="color" />
-        <!--STYLE_STROKE_AND_FILL手指没有触摸的外圆中内圆颜色-->
-        <attr name="color_no_finger_outer_inner_circle" format="color" />
         <!--手指没有触摸，style为stroke的strokeWidth-->
         <attr name="no_finger_stroke_width" format="integer" />
         <!--手指触摸时内圆的样式-->
@@ -29,20 +26,15 @@
         <attr name="style_finger_on_outer_circle" format="enum">
             <enum name="style_fill" value="0" />
             <enum name="style_stroke" value="1" />
-            <enum name="style_stroke_and_fill" value="2" />
         </attr>
         <!--手指触摸时内圆的颜色-->
         <attr name="color_finger_on_inner_circle" format="color" />
         <!--手指触摸时外圆的颜色-->
         <attr name="color_finger_on_outer_circle" format="color" />
-        <!--STYLE_STROKE_AND_FILL手指触摸时的外圆中内圆颜色-->
-        <attr name="color_finger_on_outer_inner_circle" format="color" />
-
         <!--手指离开时，匹配的外圆样式-->
         <attr name="style_finger_up_match_outer_circle" format="enum">
             <enum name="style_fill" value="0" />
             <enum name="style_stroke" value="1" />
-            <enum name="style_stroke_and_fill" value="2" />
         </attr>
         <!--手指离开时，匹配的内圆样式-->
         <attr name="style_finger_up_match_inner_circle" format="enum">
@@ -53,13 +45,10 @@
         <attr name="color_finger_up_match_inner_circle" format="color" />
         <!--手指离开时匹配的外圆颜色-->
         <attr name="color_finger_up_match_outer_circle" format="color" />
-        <!--STYLE_STROKE_AND_FILL手指离开时匹配的外圆中内圆的颜色-->
-        <attr name="color_finger_up_match_outer_inner_circle" format="color" />
         <!--手指离开时，不匹配的外圆样式-->
         <attr name="style_finger_up_un_match_outer_circle" format="enum">
             <enum name="style_fill" value="0" />
             <enum name="style_stroke" value="1" />
-            <enum name="style_stroke_and_fill" value="2" />
         </attr>
         <!--手指离开时，不匹配的内圆样式-->
         <attr name="style_finger_up_un_match_inner_circle" format="enum">
@@ -70,40 +59,6 @@
         <attr name="color_finger_up_un_match_inner_circle" format="color" />
         <!--手指离开时不匹配的外圆颜色-->
         <attr name="color_finger_up_un_match_outer_circle" format="color" />
-        <!--STYLE_STROKE_AND_FILL手指离开时不匹配的外圆中内圆的颜色-->
-        <attr name="color_finger_up_un_match_outer_inner_circle" format="color" />
-
-        <!--手指没有触摸时，STYLE_STROKE样式下，内外圆的边框宽度-->
-        <attr name="stroke_width_no_finger_inner_circle" format="integer" />
-        <attr name="stroke_width_no_finger_outer_circle" format="integer" />
-        <!--手指触摸时，STYLE_STROKE样式下，内外圆的边框宽度-->
-        <attr name="stroke_width_finger_on_inner_circle" format="integer" />
-        <attr name="stroke_width_finger_on_outer_circle" format="integer" />
-        <!--手指离开时，匹配不匹配STYLE_STROKE样式下，内外圆的边框宽度-->
-        <attr name="stroke_width_finger_up_match_inner_circle" format="integer" />
-        <attr name="stroke_width_finger_up_match_outer_circle" format="integer" />
-        <attr name="stroke_width_finger_up_un_match_outer_circle" format="integer" />
-        <attr name="stroke_width_finger_up_un_match_inner_circle" format="integer" />
-
-        <!--各个状态下内圆大小的百分比-->
-        <attr name="rate_no_finger_inner_circle" format="float" />
-        <attr name="rate_finger_on_inner_circle" format="float" />
-        <attr name="rate_finger_up_match_inner_circle" format="float" />
-        <attr name="rate_finger_up_un_match_inner_circle" format="float" />
-
-        <!--是否显示箭头-->
-        <attr name="isShowArrow" format="boolean" />
-        <!--箭头大小的百分比-->
-        <attr name="rate_arrow" format="float" />
-
-        <!--画笔的宽度-->
-        <attr name="path_width" format="dimension" />
-        <!--各种状态下路径的颜色-->
-        <attr name="finger_on_path_color" format="color" />
-        <attr name="finger_up_match_path_color" format="color" />
-        <attr name="finger_up_un_match_path_color" format="color" />
-        <!--路径的透明度0-255-->
-        <attr name="path_alpha" format="integer" />
         <!--圆点的个数-->
         <attr name="count" format="integer" />
         <!--尝试的次数-->

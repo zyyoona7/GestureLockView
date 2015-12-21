@@ -8,7 +8,6 @@ import android.graphics.Path;
 import android.graphics.Point;
 import android.util.AttributeSet;
 import android.util.Log;
-import android.util.TypedValue;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.accessibility.AccessibilityManager;
@@ -60,12 +59,10 @@ public class GestureLockViewGroup extends RelativeLayout {
 
     //手指没有触摸外圆的颜色
     private int mNoFingerOuterCircleColor = 0xFFE0DBDB;
-    private int mNoFingerOuterCircleInnerColor = 0xFFE0DBDB;
 
     //手指触摸时的颜色
     private int mFingerOnColorInner = 0xFF378FC9;
     private int mFingerOnColorOuter = 0xFF378FC9;
-    private int mFingerOnColorOuterInner = 0xFF378FC9;
 
     //手指离开的颜色
     private int mFingerUpColorMatchInner = 0xFFFF0000;
@@ -73,10 +70,6 @@ public class GestureLockViewGroup extends RelativeLayout {
     private int mFingerUpColorUnMatchOuter = 0xFFFF0000;
     private int mFingerUpColorUnMatchInner = 0xFFFF0000;
 
-    private int mFingerUpColorMatchOuterInner = 0xFFFF0000;
-    private int mFingerUpColorUnMatchOuterInner = 0xFFFF0000;
-
-    //各种状态下的内外圆样式
     private static final int STYLE_FILL = 0;
     private int mNoFingerInnerCircleStyle = STYLE_FILL;
     private int mNoFingerOuterCircleStyle = STYLE_FILL;
@@ -86,38 +79,6 @@ public class GestureLockViewGroup extends RelativeLayout {
     private int mFingerUpMatchOuterCircleStyle = STYLE_FILL;
     private int mFingerUpUnMatchOuterCircleStyle = STYLE_FILL;
     private int mFingerUpUnMatchInnerCircleStyle = STYLE_FILL;
-
-    //STYLE_STROKE样式时，各种状态下的内外圆的边框宽度
-    private int mNoFingerInnerCircleStrokeWidth = 2;
-    private int mNoFingerOuterCircleStrokeWidth = 2;
-    private int mFingerOnInnerCircleStrokeWidth = 2;
-    private int mFingerOnOuterCircleStrokeWidth = 2;
-    private int mFingerUpMatchInnerCircleStrokeWidth = 2;
-    private int mFingerUpMatchOuterCircleStrokeWidth = 2;
-    private int mFingerUpUnMatchInnerCircleStrokeWidth = 2;
-    private int mFingerUpUnMatchOuterCircleStrokeWidth = 2;
-
-    //四种状态的内圆大小百分比
-    private float mNoFingerInnerCircleRate = 0.3f;
-    private float mFingerOnInnerCircleRate = 0.3f;
-    private float mFingerUpMatchInnerCircleRate = 0.3f;
-    private float mFingerUpUnMatchInnerCircleRate = 0.3f;
-
-    //箭头大小的百分比
-    private float mArrowRate = 0.3f;
-    //是否显示箭头
-    private boolean isShowArrow = true;
-
-    //路径的宽度
-    private int mPathWidth = 10;
-
-    //各个状态路径的颜色
-    private int mFingerOnPathColor = 0xFF378FC9;
-    private int mFingerUpMatchPathColor = 0xFF378FC9;
-    private int mFingerUpUnMatchPathColor = 0xFFFF0000;
-
-    //路径的透明度
-    private int mPathAlpha = 50;
 
     //宽度和高度
     private int mWidth;
@@ -225,51 +186,21 @@ public class GestureLockViewGroup extends RelativeLayout {
 
         mNoFingerInnerCircleColor = array.getColor(R.styleable.GestureLockViewGroup_color_no_finger_inner_circle, mNoFingerInnerCircleColor);
         mNoFingerOuterCircleColor = array.getColor(R.styleable.GestureLockViewGroup_color_no_finger_outer_circle, mNoFingerOuterCircleColor);
+        mFingerOnColorInner = array.getColor(R.styleable.GestureLockViewGroup_color_finger_on_inner_circle, mFingerOnColorOuter);
         mFingerOnColorOuter = array.getColor(R.styleable.GestureLockViewGroup_color_finger_on_outer_circle, mFingerOnColorOuter);
-        mFingerOnColorInner = array.getColor(R.styleable.GestureLockViewGroup_color_finger_on_inner_circle, mFingerOnColorInner);
+        mFingerUpColorMatchInner = array.getColor(R.styleable.GestureLockViewGroup_color_finger_up_match_inner_circle, mFingerUpColorMatchOuter);
         mFingerUpColorMatchOuter = array.getColor(R.styleable.GestureLockViewGroup_color_finger_up_match_outer_circle, mFingerUpColorMatchOuter);
-        mFingerUpColorMatchInner = array.getColor(R.styleable.GestureLockViewGroup_color_finger_up_match_inner_circle, mFingerUpColorMatchInner);
         mFingerUpColorUnMatchOuter = array.getColor(R.styleable.GestureLockViewGroup_color_finger_up_un_match_outer_circle, mFingerUpColorUnMatchOuter);
-        mFingerUpColorUnMatchInner = array.getColor(R.styleable.GestureLockViewGroup_color_finger_up_un_match_inner_circle, mFingerUpColorUnMatchInner);
+        mFingerUpColorUnMatchInner = array.getColor(R.styleable.GestureLockViewGroup_color_finger_up_un_match_inner_circle, mFingerUpColorUnMatchOuter);
 
+        mNoFingerInnerCircleStyle = array.getInt(R.styleable.GestureLockViewGroup_style_no_finger_inner_circle, mNoFingerOuterCircleStyle);
         mNoFingerOuterCircleStyle = array.getInt(R.styleable.GestureLockViewGroup_style_no_finger_outer_circle, mNoFingerOuterCircleStyle);
-        mNoFingerInnerCircleStyle = array.getInt(R.styleable.GestureLockViewGroup_style_no_finger_inner_circle, mNoFingerInnerCircleStyle);
         mFingerOnOuterCircleStyle = array.getInt(R.styleable.GestureLockViewGroup_style_finger_on_outer_circle, mFingerOnOuterCircleStyle);
-        mFingerOnInnerCircleStyle = array.getInt(R.styleable.GestureLockViewGroup_style_finger_on_inner_circle, mFingerOnInnerCircleStyle);
+        mFingerOnInnerCircleStyle = array.getInt(R.styleable.GestureLockViewGroup_style_finger_on_inner_circle, mFingerOnOuterCircleStyle);
+        mFingerUpMatchInnerCircleStyle = array.getInt(R.styleable.GestureLockViewGroup_style_finger_up_match_inner_circle, mFingerUpMatchOuterCircleStyle);
         mFingerUpMatchOuterCircleStyle = array.getInt(R.styleable.GestureLockViewGroup_style_finger_up_match_outer_circle, mFingerUpMatchOuterCircleStyle);
-        mFingerUpMatchInnerCircleStyle = array.getInt(R.styleable.GestureLockViewGroup_style_finger_up_match_inner_circle, mFingerUpMatchInnerCircleStyle);
         mFingerUpUnMatchOuterCircleStyle = array.getInt(R.styleable.GestureLockViewGroup_style_finger_up_un_match_outer_circle, mFingerUpUnMatchOuterCircleStyle);
-        mFingerUpUnMatchInnerCircleStyle = array.getInt(R.styleable.GestureLockViewGroup_style_finger_up_un_match_inner_circle, mFingerUpUnMatchInnerCircleStyle);
-
-        mNoFingerInnerCircleStrokeWidth = array.getInt(R.styleable.GestureLockViewGroup_stroke_width_no_finger_inner_circle, mNoFingerInnerCircleStrokeWidth);
-        mNoFingerOuterCircleStrokeWidth = array.getInt(R.styleable.GestureLockViewGroup_stroke_width_no_finger_outer_circle, mNoFingerOuterCircleStrokeWidth);
-        mFingerOnOuterCircleStrokeWidth = array.getInt(R.styleable.GestureLockViewGroup_stroke_width_finger_on_outer_circle, mFingerOnOuterCircleStrokeWidth);
-        mFingerOnInnerCircleStrokeWidth = array.getInt(R.styleable.GestureLockViewGroup_stroke_width_finger_on_inner_circle, mFingerOnInnerCircleStrokeWidth);
-        mFingerUpMatchInnerCircleStrokeWidth = array.getInt(R.styleable.GestureLockViewGroup_stroke_width_finger_up_match_inner_circle, mFingerUpMatchInnerCircleStrokeWidth);
-        mFingerUpMatchOuterCircleStrokeWidth = array.getInt(R.styleable.GestureLockViewGroup_stroke_width_finger_up_match_outer_circle, mFingerUpMatchOuterCircleStrokeWidth);
-        mFingerUpUnMatchOuterCircleStrokeWidth = array.getInt(R.styleable.GestureLockViewGroup_stroke_width_finger_up_un_match_outer_circle, mFingerUpUnMatchOuterCircleStrokeWidth);
-        mFingerUpUnMatchInnerCircleStrokeWidth = array.getInt(R.styleable.GestureLockViewGroup_stroke_width_finger_up_un_match_inner_circle, mFingerUpUnMatchInnerCircleStrokeWidth);
-
-        mNoFingerInnerCircleRate = array.getFloat(R.styleable.GestureLockViewGroup_rate_no_finger_inner_circle, mNoFingerInnerCircleRate);
-        mFingerOnInnerCircleRate = array.getFloat(R.styleable.GestureLockViewGroup_rate_finger_on_inner_circle, mFingerOnInnerCircleRate);
-        mFingerUpMatchInnerCircleRate = array.getFloat(R.styleable.GestureLockViewGroup_rate_finger_up_match_inner_circle, mFingerUpMatchInnerCircleRate);
-        mFingerUpUnMatchInnerCircleRate = array.getFloat(R.styleable.GestureLockViewGroup_rate_finger_up_un_match_inner_circle, mFingerUpUnMatchInnerCircleRate);
-
-        mArrowRate = array.getFloat(R.styleable.GestureLockViewGroup_rate_arrow, mArrowRate);
-        isShowArrow = array.getBoolean(R.styleable.GestureLockViewGroup_isShowArrow, isShowArrow);
-
-        mPathWidth = array.getDimensionPixelOffset(R.styleable.GestureLockViewGroup_path_width, (int) TypedValue.applyDimension(
-                TypedValue.COMPLEX_UNIT_DIP, 5, getResources().getDisplayMetrics()));
-
-        mFingerOnPathColor = array.getColor(R.styleable.GestureLockViewGroup_finger_on_path_color, mFingerOnPathColor);
-        mFingerUpMatchPathColor = array.getColor(R.styleable.GestureLockViewGroup_finger_up_match_path_color, mFingerUpMatchPathColor);
-        mFingerUpUnMatchPathColor = array.getColor(R.styleable.GestureLockViewGroup_finger_up_un_match_path_color, mFingerUpUnMatchPathColor);
-        mPathAlpha = array.getInt(R.styleable.GestureLockViewGroup_path_alpha, mPathAlpha);
-
-        mFingerOnColorOuterInner = array.getColor(R.styleable.GestureLockViewGroup_color_finger_on_outer_inner_circle, mFingerOnColorOuterInner);
-        mNoFingerOuterCircleInnerColor = array.getColor(R.styleable.GestureLockViewGroup_color_no_finger_outer_inner_circle, mNoFingerOuterCircleInnerColor);
-        mFingerUpColorMatchOuterInner = array.getColor(R.styleable.GestureLockViewGroup_color_finger_up_match_outer_inner_circle, mFingerUpColorMatchOuterInner);
-        mFingerUpColorUnMatchOuterInner = array.getColor(R.styleable.GestureLockViewGroup_color_finger_up_un_match_outer_inner_circle, mFingerUpColorUnMatchOuterInner);
+        mFingerUpUnMatchInnerCircleStyle = array.getInt(R.styleable.GestureLockViewGroup_style_finger_up_un_match_inner_circle, mFingerUpUnMatchOuterCircleStyle);
         mCount = array.getInt(R.styleable.GestureLockViewGroup_count, 3);
         mTryTimes = array.getInt(R.styleable.GestureLockViewGroup_tryTimes, 5);
 
@@ -299,15 +230,12 @@ public class GestureLockViewGroup extends RelativeLayout {
             //计算GestureLockView的间距
             mMarginBetweenLockView = (int) (mGestureLockViewWidth * 0.25);
             // 设置画笔的宽度为GestureLockView的内圆直径稍微小点（不喜欢的话，随便设）
-            mPaint.setStrokeWidth(mPathWidth);
+            mPaint.setStrokeWidth(mGestureLockViewWidth * 0.29f);
 
             for (int i = 0; i < mGestureLockViews.length; i++) {
                 mGestureLockViews[i] = new GestureLockView(getContext(), mNoFingerInnerCircleColor, mNoFingerOuterCircleColor, mFingerOnColorInner, mFingerOnColorOuter,
                         mFingerUpColorMatchInner, mFingerUpColorMatchOuter, mFingerUpColorUnMatchInner, mFingerUpColorUnMatchOuter, mNoFingerInnerCircleStyle, mNoFingerOuterCircleStyle,
-                        mFingerOnInnerCircleStyle, mFingerOnOuterCircleStyle, mFingerUpMatchInnerCircleStyle, mFingerUpMatchOuterCircleStyle, mFingerUpUnMatchInnerCircleStyle, mFingerUpUnMatchOuterCircleStyle,
-                        mNoFingerInnerCircleStrokeWidth, mNoFingerOuterCircleStrokeWidth, mFingerOnInnerCircleStrokeWidth, mFingerOnOuterCircleStrokeWidth, mFingerUpMatchInnerCircleStrokeWidth,
-                        mFingerUpMatchOuterCircleStrokeWidth, mFingerUpUnMatchInnerCircleStrokeWidth, mFingerUpUnMatchOuterCircleStrokeWidth, mArrowRate, mNoFingerInnerCircleRate, mFingerOnInnerCircleRate, mFingerUpMatchInnerCircleRate,
-                        mFingerUpUnMatchInnerCircleRate, isShowArrow, mNoFingerOuterCircleInnerColor, mFingerOnColorOuterInner, mFingerUpColorMatchOuterInner, mFingerUpColorUnMatchOuterInner);
+                        mFingerOnInnerCircleStyle, mFingerOnOuterCircleStyle, mFingerUpMatchInnerCircleStyle, mFingerUpMatchOuterCircleStyle, mFingerUpUnMatchInnerCircleStyle, mFingerUpUnMatchOuterCircleStyle);
                 mGestureLockViews[i].setId(i + 1);
                 //设置参数，主要是定位GestureLockView间的位置
                 RelativeLayout.LayoutParams lockerParams = new LayoutParams(mGestureLockViewWidth, mGestureLockViewWidth);
@@ -374,9 +302,10 @@ public class GestureLockViewGroup extends RelativeLayout {
         GestureLockView touchChild = null;
         switch (action) {
             case MotionEvent.ACTION_DOWN:
+                Log.e("MotionEvent", "ACTION_DOWN");
                 reset();
-                mPaint.setColor(mFingerOnPathColor);
-                mPaint.setAlpha(mPathAlpha);
+                mPaint.setColor(mFingerOnColorOuter);
+                mPaint.setAlpha(50);
                 touchChild = getChildIdByPos(x, y);
                 if (touchChild != null) {
                     int touchId = touchChild.getId();
@@ -396,6 +325,7 @@ public class GestureLockViewGroup extends RelativeLayout {
                 mTmpTarget.y = y;
                 break;
             case MotionEvent.ACTION_MOVE:
+                Log.e("MotionEvent", "ACTION_MOVE.......");
                 GestureLockView child = getChildIdByPos(x, y);
                 if (child != null) {
                     int cId = child.getId();
@@ -410,6 +340,8 @@ public class GestureLockViewGroup extends RelativeLayout {
                         //设置指引线的起点
                         mLastPathX = child.getLeft() / 2 + child.getRight() / 2;
                         mLastPathY = child.getTop() / 2 + child.getBottom() / 2;
+                        Log.e("LastPath", "LastPathX:" + mLastPathX);
+                        Log.e("LastPath", "LastPathY:" + mLastPathY);
                         if (mChoose.size() == 1) {// 当前添加为第一个
                             mPath.moveTo(mLastPathX, mLastPathY);
                         } else {
@@ -423,8 +355,9 @@ public class GestureLockViewGroup extends RelativeLayout {
                 mTmpTarget.y = y;
                 break;
             case MotionEvent.ACTION_UP:
-                mPaint.setColor(mFingerUpUnMatchPathColor);
-                mPaint.setAlpha(mPathAlpha);
+                Log.e("MotionEvent", "ACTION_UP..");
+                mPaint.setColor(mFingerUpColorMatchOuter);
+                mPaint.setAlpha(50);
                 if (isInitMode) {
 
                     if (mOnGestureLockViewInitModeListener != null) {
@@ -440,8 +373,6 @@ public class GestureLockViewGroup extends RelativeLayout {
                             mOnGestureLockViewListener.onUnmatchedExceedBoundary();
                         }
                         if (checkAnswer()) {
-                            mPaint.setColor(mFingerUpMatchPathColor);
-                            mPaint.setAlpha(mPathAlpha);
                             changeItemMode(true);
                         } else {
                             changeItemMode(false);
@@ -456,10 +387,9 @@ public class GestureLockViewGroup extends RelativeLayout {
 
                 //改变选中的GestureLockView的状态
 //                changeItemMode();
-                if (isShowArrow) {
-                    // 计算每个元素中箭头需要旋转的角度
-                    computeRange();
-                }
+
+                // 计算每个元素中箭头需要旋转的角度
+                computeRange();
                 break;
         }
         invalidate();
@@ -476,14 +406,11 @@ public class GestureLockViewGroup extends RelativeLayout {
             } else {
                 mOnGestureLockViewInitModeListener.onInitModeGestureEvent(false);
             }
-
             changeItemMode(false);
         } else {
             if (isFirstSet) {
                 mFirstAnswer = getInitModeAnswer(mChoose);
                 mOnGestureLockViewInitModeListener.onFirstGestureSuccess(mFirstAnswer);
-                mPaint.setColor(mFingerUpMatchPathColor);
-                mPaint.setAlpha(mPathAlpha);
                 changeItemMode(true);
                 clearGestureLockView();
                 isFirstSet = false;
@@ -491,8 +418,6 @@ public class GestureLockViewGroup extends RelativeLayout {
                 mSecondAnswer = getInitModeAnswer(mChoose);
                 if (checkInitModeAnswer(mFirstAnswer, mSecondAnswer)) {
                     mOnGestureLockViewInitModeListener.onSecondGestureSuccess(mSecondAnswer);
-                    mPaint.setColor(mFingerUpMatchPathColor);
-                    mPaint.setAlpha(mPathAlpha);
                     changeItemMode(true);
                     isFirstSet = true;
                 } else {
