@@ -22,4 +22,11 @@
         android:layout_height="wrap_content"
         android:text="手势密码解锁" />
 
+    <com.zyyoona7.lock.GestureLockLayout
+        android:layout_width="300dp"
+        android:layout_height="300dp"
+        android:layout_gravity="center"
+        android:layout_marginTop="20dp"
+        android:id="@+id/qq_lock"/>
+
 </LinearLayout>
