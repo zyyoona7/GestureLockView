@@ -8,11 +8,13 @@ import android.graphics.Path;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.RelativeLayout;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by zyyoona7 on 2017/7/7.
@@ -22,6 +24,11 @@ import java.util.ArrayList;
 public class GestureLockLayout extends RelativeLayout {
 
     private static final String TAG = "GestureLockLayout";
+
+    //模式选择，重置密码，设置密码模式
+    public static final int RESET_MODE = 0;
+    //验证密码模式
+    public static final int VERIFY_MODE = 1;
 
     // 关于LockView的边长（n*n）： n * mLockViewWidth + ( n + 1 ) * mLockViewMargin = mWidth
     private int mLockViewWidth = 0;
@@ -66,9 +73,16 @@ public class GestureLockLayout extends RelativeLayout {
 
     //允许的尝试次数
     private int mTryTimes = 5;
+    //保存的尝试次数，因为模式切换的时候TryTimes可能不等于初始设置的值
+    private int mSavedTryTimes = 5;
 
-    private OnGestureLockListener mOnGestureLockLister;
+    private OnLockVerifyListener mOnLockVerifyListener;
+    private OnLockResetListener mOnLockResetListener;
 
+    //当前模式
+    private int mCurrentMode = RESET_MODE;
+    //RESET_MODE下最少连接数
+    private int mMinCount = 3;
 
     public GestureLockLayout(Context context) {
         this(context, null);
@@ -206,7 +220,7 @@ public class GestureLockLayout extends RelativeLayout {
                     handleMoveEvent(x, y);
                     break;
                 case MotionEvent.ACTION_UP:
-                    handleUpEvent(x, y);
+                    handleUpEvent();
                     break;
             }
             invalidate();
@@ -243,8 +257,8 @@ public class GestureLockLayout extends RelativeLayout {
                 lockView.onFingerTouch();
 
                 //手势解锁监听
-                if (mOnGestureLockLister != null) {
-                    mOnGestureLockLister.onGestureSelected(childId);
+                if (mOnLockVerifyListener != null) {
+                    mOnLockVerifyListener.onGestureSelected(childId);
                 }
 
                 mLastPathX = lockView.getView().getLeft() / 2 + lockView.getView().getRight() / 2;
@@ -264,30 +278,79 @@ public class GestureLockLayout extends RelativeLayout {
 
     /**
      * 处理抬起事件
-     *
-     * @param x
-     * @param y
      */
-    private void handleUpEvent(int x, int y) {
-        mTryTimes--;
-        boolean isAnswerRight = checkAnswer();
-        //手势解锁监听
-        if (mOnGestureLockLister != null) {
-            mOnGestureLockLister.onGestureFinished(isAnswerRight);
-            if (mTryTimes <= 0) {
-                mOnGestureLockLister.onGestureTryTimesBoundary();
-            }
-        }
-        if (!isAnswerRight) {
-            mPaint.setColor(mFingerUpUnmatchedColor);
-            toggleLockViewMatchedState(false);
+    private void handleUpEvent() {
+        if (mCurrentMode == RESET_MODE) {
+            handleResetMode();
         } else {
-            mPaint.setColor(mFingerUpMatchedColor);
-            toggleLockViewMatchedState(true);
+            handleVerifyMode();
         }
         //将指引线的终点坐标设置为最后一个Path的原点，即取消指引线
         mLineX = mLastPathX;
         mLineY = mLastPathY;
+    }
+
+    /**
+     * 处理修改密码模式
+     */
+    private void handleResetMode() {
+        if (mAnswerList.size() <= 0) {
+            //如果AnswerList.size()==0则为第一次设置，验证连接数
+            if (mChooseList.size() < mMinCount) {
+                //连接数不符
+                if (mOnLockResetListener != null) {
+                    mOnLockResetListener.onConnectCountUnmatched(mChooseList.size(), mMinCount);
+                }
+                toggleLockViewMatchedState(false);
+                return;
+            } else {
+                //连接数符合，将选择的答案赋值给mAnswerList
+                for (Integer integer : mChooseList) {
+                    //因为mAnswerList是从0开始，chooseList保存的是id从1开始，所以-1
+                    mAnswerList.add(integer - 1);
+                }
+                if (mOnLockResetListener != null) {
+                    mOnLockResetListener.onFirstPasswordFinished(mAnswerList);
+                }
+                toggleLockViewMatchedState(true);
+            }
+        } else {
+            //mAnswerList已有答案，则验证密码，两次密码匹配保存密码
+            boolean isAnswerRight = checkAnswer();
+            if (isAnswerRight) {
+                //两次密码正确，回调
+                toggleLockViewMatchedState(true);
+                if (mOnLockResetListener != null) {
+                    mOnLockResetListener.onSetPasswordFinished(true, mAnswerList);
+                }
+            } else {
+                //两次没密码不正确
+                toggleLockViewMatchedState(false);
+                if (mOnLockResetListener != null) {
+                    mOnLockResetListener.onSetPasswordFinished(false, new ArrayList<Integer>(1));
+                }
+            }
+        }
+    }
+
+    /**
+     * 处理验证密码模式
+     */
+    private void handleVerifyMode() {
+        mTryTimes--;
+        boolean isAnswerRight = checkAnswer();
+        //手势解锁监听
+        if (mOnLockVerifyListener != null) {
+            mOnLockVerifyListener.onGestureFinished(isAnswerRight);
+            if (mTryTimes <= 0) {
+                mOnLockVerifyListener.onGestureTryTimesBoundary();
+            }
+        }
+        if (!isAnswerRight) {
+            toggleLockViewMatchedState(false);
+        } else {
+            toggleLockViewMatchedState(true);
+        }
     }
 
     /**
@@ -329,12 +392,20 @@ public class GestureLockLayout extends RelativeLayout {
     /**
      * 重置手势解锁
      */
-    public void reset() {
+    private void reset() {
         mChooseList.clear();
         mPath.reset();
         for (ILockView iLockView : mILockViews) {
             iLockView.onNoFinger();
         }
+    }
+
+    /**
+     * 重置手势
+     */
+    public void resetGesture(){
+        reset();
+        invalidate();
     }
 
     /**
@@ -362,6 +433,11 @@ public class GestureLockLayout extends RelativeLayout {
      * @param isMatched
      */
     private void toggleLockViewMatchedState(boolean isMatched) {
+        if (isMatched) {
+            mPaint.setColor(mFingerUpMatchedColor);
+        } else {
+            mPaint.setColor(mFingerUpUnmatchedColor);
+        }
         for (ILockView iLockView : mILockViews) {
             if (mChooseList.contains(iLockView.getView().getId())) {
                 if (!isMatched) {
@@ -378,7 +454,6 @@ public class GestureLockLayout extends RelativeLayout {
         super.dispatchDraw(canvas);
         //画Path
         canvas.drawPath(mPath, mPaint);
-
         //画指引线
         if (mChooseList.size() > 0) {
             canvas.drawLine(mLastPathX, mLastPathY, mLineX, mLineY, mPaint);
@@ -407,8 +482,25 @@ public class GestureLockLayout extends RelativeLayout {
      * @param answer
      */
     public void setAnswer(int... answer) {
+        mAnswerList.clear();
         for (int i = 0; i < answer.length; i++) {
             mAnswerList.add(answer[i]);
+        }
+    }
+
+    /**
+     * 将String类型的Answer设置到list
+     * 必须时List的toString形式[x,x,x]
+     * @param answer
+     */
+    public void setAnswer(String answer){
+        if (answer.startsWith("[")&&answer.endsWith("]")) {
+            answer=answer.substring(1,answer.length()-1);
+            String[] answers=answer.split(",");
+            mAnswerList.clear();
+            for (int i = 0; i < answers.length; i++) {
+                mAnswerList.add(Integer.parseInt(answers[i].trim()));
+            }
         }
     }
 
@@ -428,8 +520,21 @@ public class GestureLockLayout extends RelativeLayout {
      *
      * @param listener
      */
-    public void setOnGestureLockListener(OnGestureLockListener listener) {
-        this.mOnGestureLockLister = listener;
+    public void setOnLockVerifyListener(OnLockVerifyListener listener) {
+        this.mOnLockVerifyListener = listener;
+    }
+
+    public void setOnLockResetListener(OnLockResetListener listener) {
+        this.mOnLockResetListener = listener;
+    }
+
+    /**
+     * 设置路径宽度
+     *
+     * @param dp
+     */
+    public void setPathWidth(float dp) {
+        mPaint.setStrokeWidth(ConvertUtils.dp2px(getContext(), dp));
     }
 
     /**
@@ -475,6 +580,7 @@ public class GestureLockLayout extends RelativeLayout {
      */
     public void setTryTimes(int tryTimes) {
         this.mTryTimes = tryTimes;
+        this.mSavedTryTimes = tryTimes;
     }
 
     /**
@@ -486,7 +592,28 @@ public class GestureLockLayout extends RelativeLayout {
         return mTryTimes;
     }
 
-    public interface OnGestureLockListener {
+    /**
+     * 设置密码模式下，最小连接数
+     *
+     * @param minCount
+     */
+    public void setMinCount(int minCount) {
+        this.mMinCount = minCount;
+    }
+
+    public void setMode(int mode) {
+        this.mCurrentMode = mode;
+        reset();
+        //切换到验证模式的时候，还原最大尝试次数
+        if (mCurrentMode == VERIFY_MODE) {
+            mTryTimes = mSavedTryTimes;
+        } else if (mCurrentMode == RESET_MODE) {
+            //清除已有密码数据
+            mAnswerList.clear();
+        }
+    }
+
+    public interface OnLockVerifyListener {
 
         /**
          * 移动过程中选中的id
@@ -506,6 +633,32 @@ public class GestureLockLayout extends RelativeLayout {
          * 超过尝试次数上限
          */
         void onGestureTryTimesBoundary();
+    }
+
+    public interface OnLockResetListener {
+
+        /**
+         * 连接数不符
+         *
+         * @param connectCount
+         * @param minCount
+         */
+        void onConnectCountUnmatched(int connectCount, int minCount);
+
+        /**
+         * 连接数符合，第一次密码设置成功
+         *
+         * @param answerList
+         */
+        void onFirstPasswordFinished(List<Integer> answerList);
+
+        /**
+         * 设置密码成功
+         *
+         * @param isMatched  两次密码是否匹配
+         * @param answerList 密码list
+         */
+        void onSetPasswordFinished(boolean isMatched, List<Integer> answerList);
     }
 
     /**
