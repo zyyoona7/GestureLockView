@@ -5,11 +5,45 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:orientation="vertical"
     tools:context="com.zyyoona7.sample.LauncherActivity">
 
     <Button
+        android:id="@+id/btn_setting"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="修改/设置手势解锁"
-        android:id="@+id/btn_setting"/>
+        />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="10dp"
+        android:text="密码为012"
+        android:textSize="15sp"/>
+
+    <com.zyyoona7.lock.GestureLockLayout
+        android:id="@+id/l_gesture_lock_view"
+        android:layout_width="300dp"
+        android:layout_height="300dp"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="10dp">
+
+    </com.zyyoona7.lock.GestureLockLayout>
+
+    <Button
+        android:id="@+id/btn_qq"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:text="QQ手势解锁"
+        android:textAllCaps="false"/>
+
+    <Button
+        android:id="@+id/btn_jd"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="iOS京东金融手势解锁"
+        android:textAllCaps="false"/>
 </LinearLayout>

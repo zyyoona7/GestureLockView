@@ -393,6 +393,9 @@ public class GestureLockLayout extends RelativeLayout {
      * 重置手势解锁
      */
     private void reset() {
+        if (mChooseList == null || mPath == null || mILockViews == null) {
+            return;
+        }
         mChooseList.clear();
         mPath.reset();
         for (ILockView iLockView : mILockViews) {
@@ -403,7 +406,7 @@ public class GestureLockLayout extends RelativeLayout {
     /**
      * 重置手势
      */
-    public void resetGesture(){
+    public void resetGesture() {
         reset();
         invalidate();
     }
@@ -472,6 +475,7 @@ public class GestureLockLayout extends RelativeLayout {
             mILockView = iLockView;
             if (mLockViewWidth > 0) {
                 setLockViewParams(mILockView);
+                reset();
             }
         }
     }
@@ -491,12 +495,13 @@ public class GestureLockLayout extends RelativeLayout {
     /**
      * 将String类型的Answer设置到list
      * 必须时List的toString形式[x,x,x]
+     *
      * @param answer
      */
-    public void setAnswer(String answer){
-        if (answer.startsWith("[")&&answer.endsWith("]")) {
-            answer=answer.substring(1,answer.length()-1);
-            String[] answers=answer.split(",");
+    public void setAnswer(String answer) {
+        if (answer.startsWith("[") && answer.endsWith("]")) {
+            answer = answer.substring(1, answer.length() - 1);
+            String[] answers = answer.split(",");
             mAnswerList.clear();
             for (int i = 0; i < answers.length; i++) {
                 mAnswerList.add(Integer.parseInt(answers[i].trim()));
