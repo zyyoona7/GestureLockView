@@ -10,6 +10,7 @@ import android.view.View;
 
 public interface ILockView {
 
+    //手势状态
     int NO_FINGER = 0;
     int FINGER_TOUCH = 1;
     int FINGER_UP_MATCHED = 2;
