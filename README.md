@@ -20,7 +20,7 @@
         android:layout_centerInParent="true"
         android:orientation="vertical">
       
-		<!--设置手势解锁时提示view-->
+	<!--设置手势解锁时提示view-->
         <com.zyyoona7.lock.GestureLockDisplayView
             android:id="@+id/l_display_view"
             android:layout_width="50dp"
