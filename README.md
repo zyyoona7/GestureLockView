@@ -14,7 +14,7 @@
 布局文件中：
 
 ```xml
-	<LinearLayout
+    <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerInParent="true"
@@ -49,7 +49,7 @@
 java 代码中：
 
 ```java
-	private void initViews() {
+    private void initViews() {
         mGestureLockLayout = (GestureLockLayout) findViewById(R.id.l_gesture_view);
         mLockDisplayView = (GestureLockDisplayView) findViewById(R.id.l_display_view);
         mSettingHintText = (TextView) findViewById(R.id.tv_setting_hint);
@@ -69,7 +69,7 @@ java 代码中：
         mGestureLockLayout.setMode(GestureLockLayout.RESET_MODE);
     }
 
-	private void initEvents() {
+    private void initEvents() {
         mGestureLockLayout.setOnLockResetListener(new GestureLockLayout.OnLockResetListener() {
             @Override
             public void onConnectCountUnmatched(int connectCount, int minCount) {
@@ -104,10 +104,10 @@ java 代码中：
         });
     }
 
-	/**
+    /**
      * 重置
      */
-	private void resetGesture() {
+    private void resetGesture() {
         mHandler.postDelayed(new Runnable() {
             @Override
             public void run() {
@@ -122,7 +122,7 @@ java 代码中：
 布局文件中：
 
 ```xml
-	<LinearLayout
+    <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerInParent="true"
@@ -148,7 +148,7 @@ java 代码中：
 java 代码中：
 
 ```java
-	private void initViews() {
+    private void initViews() {
         mGestureLockLayout = (GestureLockLayout) findViewById(R.id.l_lock_view);
         mHintText = (TextView) findViewById(R.id.tv_hint);
         //设置手势解锁模式为验证模式
@@ -161,7 +161,7 @@ java 代码中：
         mGestureLockLayout.setAnswer(getCacheAnswer());
     }
 
-	private void initEvents() {
+    private void initEvents() {
         mGestureLockLayout.setOnLockVerifyListener(new GestureLockLayout.OnLockVerifyListener() {
             @Override
             public void onGestureSelected(int id) {
