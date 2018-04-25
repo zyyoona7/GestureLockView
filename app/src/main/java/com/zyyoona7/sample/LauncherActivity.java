@@ -55,11 +55,10 @@ public class LauncherActivity extends AppCompatActivity {
         mQQBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                final QQLockView lockView=new QQLockView(LauncherActivity.this);
                 mGestureLockLayout.setLockView(new LockViewFactory() {
                     @Override
                     public ILockView newLockView() {
-                        return lockView;
+                        return new QQLockView(LauncherActivity.this);
                     }
                 });
                 mGestureLockLayout.setPathWidth(2);
@@ -72,11 +71,10 @@ public class LauncherActivity extends AppCompatActivity {
         mJDBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                final JDLockView lockView=new JDLockView(LauncherActivity.this);
                 mGestureLockLayout.setLockView(new LockViewFactory() {
                     @Override
                     public ILockView newLockView() {
-                        return lockView;
+                        return new JDLockView(LauncherActivity.this);
                     }
                 });
                 mGestureLockLayout.setPathWidth(1);
