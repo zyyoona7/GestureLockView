@@ -1,6 +1,5 @@
 package com.zyyoona7.lock;
 
-import android.content.Context;
 import android.view.View;
 
 /**
@@ -22,14 +21,6 @@ public interface ILockView {
      * @return
      */
     View getView();
-
-    /**
-     * 新建view对象
-     *
-     * @param context
-     * @return
-     */
-    View newInstance(Context context);
 
     /**
      * 手指没触摸之前，初始状态

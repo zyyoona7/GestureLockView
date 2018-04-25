@@ -10,7 +10,9 @@ import android.widget.Button;
 import android.widget.Toast;
 
 import com.zyyoona7.lock.GestureLockLayout;
+import com.zyyoona7.lock.ILockView;
 import com.zyyoona7.lock.JDLockView;
+import com.zyyoona7.lock.LockViewFactory;
 import com.zyyoona7.lock.QQLockView;
 
 
@@ -53,8 +55,13 @@ public class LauncherActivity extends AppCompatActivity {
         mQQBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                QQLockView lockView=new QQLockView(LauncherActivity.this);
-                mGestureLockLayout.setLockView(lockView);
+                final QQLockView lockView=new QQLockView(LauncherActivity.this);
+                mGestureLockLayout.setLockView(new LockViewFactory() {
+                    @Override
+                    public ILockView newLockView() {
+                        return lockView;
+                    }
+                });
                 mGestureLockLayout.setPathWidth(2);
                 mGestureLockLayout.setTouchedPathColor(Color.parseColor("#01A0E5"));
                 mGestureLockLayout.setMatchedPathColor(Color.parseColor("#01A0E5"));
@@ -65,8 +72,13 @@ public class LauncherActivity extends AppCompatActivity {
         mJDBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                JDLockView lockView=new JDLockView(LauncherActivity.this);
-                mGestureLockLayout.setLockView(lockView);
+                final JDLockView lockView=new JDLockView(LauncherActivity.this);
+                mGestureLockLayout.setLockView(new LockViewFactory() {
+                    @Override
+                    public ILockView newLockView() {
+                        return lockView;
+                    }
+                });
                 mGestureLockLayout.setPathWidth(1);
                 mGestureLockLayout.setTouchedPathColor(Color.BLUE);
                 mGestureLockLayout.setMatchedPathColor(Color.BLUE);

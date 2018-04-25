@@ -8,7 +8,9 @@ import android.widget.TextView;
 
 import com.zyyoona7.lock.GestureLockDisplayView;
 import com.zyyoona7.lock.GestureLockLayout;
+import com.zyyoona7.lock.ILockView;
 import com.zyyoona7.lock.JDLockView;
+import com.zyyoona7.lock.LockViewFactory;
 
 import java.util.List;
 
@@ -42,7 +44,12 @@ public class LockSettingActivity extends AppCompatActivity {
         //设置手势解锁view 最少连接数
         mGestureLockLayout.setMinCount(3);
         //默认解锁样式为手Q手势解锁样式
-        mGestureLockLayout.setLockView(new JDLockView(this));
+        mGestureLockLayout.setLockView(new LockViewFactory() {
+            @Override
+            public ILockView newLockView() {
+                return new JDLockView(LockSettingActivity.this);
+            }
+        });
         //设置手势解锁view 模式为重置密码模式
         mGestureLockLayout.setMode(GestureLockLayout.RESET_MODE);
     }

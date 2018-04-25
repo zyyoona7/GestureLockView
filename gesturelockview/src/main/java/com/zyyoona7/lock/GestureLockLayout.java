@@ -8,7 +8,6 @@ import android.graphics.Path;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.RelativeLayout;
@@ -37,7 +36,7 @@ public class GestureLockLayout extends RelativeLayout {
     //LockView数组
     private ArrayList<ILockView> mILockViews = new ArrayList<>(1);
 
-    private ILockView mILockView = null;
+    private LockViewFactory mLockViewFactory = null;
 
     //x*x的手势解锁
     private int mDotCount = 3;
@@ -93,9 +92,14 @@ public class GestureLockLayout extends RelativeLayout {
         init(context);
     }
 
-    private void init(Context context) {
-        if (mILockView == null) {
-            setLockView(new QQLockView(context));
+    private void init(final Context context) {
+        if (mLockViewFactory == null) {
+            setLockView(new LockViewFactory() {
+                @Override
+                public ILockView newLockView() {
+                    return new QQLockView(context);
+                }
+            });
         }
 
         mPaint = new Paint();
@@ -120,22 +124,22 @@ public class GestureLockLayout extends RelativeLayout {
         //计算LockView的间距
         mLockViewMargin = (int) (mLockViewWidth * 0.25);
 
-        if (mILockView != null) {
-            setLockViewParams(mILockView);
+        if (mLockViewFactory != null) {
+            setLockViewParams(mLockViewFactory);
         }
     }
 
     /**
      * 设置LockView的参数并添加到布局中
      *
-     * @param lockView
+     * @param lockViewFactory
      */
-    private void setLockViewParams(ILockView lockView) {
+    private void setLockViewParams(LockViewFactory lockViewFactory) {
         if (mILockViews.size() > 0) {
             return;
         }
         for (int i = 0; i < mDotCount * mDotCount; i++) {
-            ILockView iLockView = (ILockView) lockView.newInstance(getContext());
+            ILockView iLockView = lockViewFactory.newLockView();
             iLockView.getView().setId(i + 1);
             mILockViews.add(iLockView);
             RelativeLayout.LayoutParams lockerParams = new LayoutParams(mLockViewWidth, mLockViewWidth);
@@ -466,15 +470,15 @@ public class GestureLockLayout extends RelativeLayout {
     /**
      * 设置LockView
      *
-     * @param iLockView
+     * @param lockViewFactory
      */
-    public void setLockView(ILockView iLockView) {
-        if (iLockView != null) {
+    public void setLockView(LockViewFactory lockViewFactory) {
+        if (lockViewFactory != null) {
             removeAllViewsInLayout();
             mILockViews.clear();
-            mILockView = iLockView;
+            mLockViewFactory = lockViewFactory;
             if (mLockViewWidth > 0) {
-                setLockViewParams(mILockView);
+                setLockViewParams(mLockViewFactory);
                 reset();
             }
         }

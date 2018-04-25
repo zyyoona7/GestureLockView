@@ -137,11 +137,6 @@ public class QQLockView extends View implements ILockView {
     }
 
     @Override
-    public View newInstance(Context context) {
-        return new QQLockView(context);
-    }
-
-    @Override
     public void onNoFinger() {
         mCurrentState = NO_FINGER;
         postInvalidate();

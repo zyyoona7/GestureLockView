@@ -121,11 +121,6 @@ public class JDLockView extends View implements ILockView {
     }
 
     @Override
-    public View newInstance(Context context) {
-        return new JDLockView(context);
-    }
-
-    @Override
     public void onNoFinger() {
         mCurrentState=NO_FINGER;
         postInvalidate();
