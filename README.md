@@ -221,14 +221,6 @@ public interface ILockView {
     View getView();
 
     /**
-     * 新建view对象
-     *
-     * @param context
-     * @return
-     */
-    View newInstance(Context context);
-
-    /**
      * 手指没触摸之前，初始状态
      */
     void onNoFinger();
@@ -362,11 +354,6 @@ public class JDLockView extends View implements ILockView {
     }
 
     @Override
-    public View newInstance(Context context) {
-        return new JDLockView(context);
-    }
-
-    @Override
     public void onNoFinger() {
         mCurrentState=NO_FINGER;
         postInvalidate();
@@ -396,7 +383,12 @@ public class JDLockView extends View implements ILockView {
 
 ```java
 //设置手势解锁样式
-mGestureLockLayout.setLockView(new JDLockView(this));
+mGestureLockLayout.setLockView(new LockViewFactory() {
+            @Override
+            public ILockView newLockView() {
+                return new JDLockView(LockSettingActivity.this);
+            }
+        });
 ```
 
 其他用法同 1 一致。
